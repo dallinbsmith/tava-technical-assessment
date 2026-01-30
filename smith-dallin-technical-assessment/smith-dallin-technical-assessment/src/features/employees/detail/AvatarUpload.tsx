@@ -4,7 +4,14 @@ import { Camera, Upload, X, Loader2, Check } from "lucide-react";
 import { cn } from "../../../shared/lib/styles";
 import { uploadAvatar } from "../../../shared/lib/api";
 import Avatar from "../list/Avatar";
-import { AvatarUploadProps } from "../__types__";
+
+type Props = {
+  currentAvatarUrl?: string;
+  firstName: string;
+  lastName: string;
+  onUpload: (imageUrl: string) => Promise<unknown>;
+  inactive?: boolean;
+};
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
 const SUCCESS_TIMEOUT = 2000;
@@ -15,7 +22,7 @@ const AvatarUpload = ({
   lastName,
   onUpload,
   inactive = false,
-}: AvatarUploadProps) => {
+}: Props) => {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [isDragging, setIsDragging] = useState(false);

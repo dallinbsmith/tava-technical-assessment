@@ -143,7 +143,7 @@ describe("EmployeeListPage", () => {
       data: { data: [], total: 0, page: 1, limit: 9 },
       isLoading: false,
       error: null,
-    } as ReturnType<typeof queries.useEmployeesQuery>);
+    } as unknown as ReturnType<typeof queries.useEmployeesQuery>);
 
     render(<EmployeeListPage />);
 

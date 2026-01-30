@@ -1,7 +1,17 @@
 import { X } from "lucide-react";
-import { ActiveFiltersProps } from "../__types__";
 
-const ActiveFilters = ({ filters, onClearAll }: ActiveFiltersProps) => {
+type FilterChip = {
+  type: string;
+  value: string;
+  onRemove: () => void;
+};
+
+type Props = {
+  filters: FilterChip[];
+  onClearAll: () => void;
+};
+
+const ActiveFilters = ({ filters, onClearAll }: Props) => {
   if (filters.length === 0) return null;
 
   return (

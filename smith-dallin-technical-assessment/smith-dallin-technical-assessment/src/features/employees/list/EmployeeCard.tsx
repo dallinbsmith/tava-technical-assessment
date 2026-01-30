@@ -1,9 +1,13 @@
 import { Link } from "react-router-dom";
 import { Building2, Calendar } from "lucide-react";
-import { EmployeeCardProps } from "../__types__";
+import { Employee } from "../__types__";
 import Avatar from "./Avatar";
 
-const EmployeeCard = ({ employee: emp }: EmployeeCardProps) => {
+type Props = {
+  employee: Employee;
+};
+
+const EmployeeCard = ({ employee: emp }: Props) => {
   const isInactive = emp.status === "inactive";
 
   return (

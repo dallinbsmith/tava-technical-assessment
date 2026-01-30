@@ -1,6 +1,16 @@
 import { useState } from "react";
 import { cn } from "../../../shared/lib/styles";
-import { AvatarProps, AvatarSize } from "../__types__";
+
+type AvatarSize = "sm" | "md" | "lg" | "xl";
+
+type Props = {
+  src?: string;
+  firstName: string;
+  lastName: string;
+  size?: AvatarSize;
+  className?: string;
+  inactive?: boolean;
+};
 
 const sizeClasses: Record<AvatarSize, { container: string; text: string }> = {
   sm: { container: "w-8 h-8", text: "text-xs" },
@@ -16,7 +26,7 @@ const Avatar = ({
   size = "md",
   className,
   inactive = false,
-}: AvatarProps) => {
+}: Props) => {
   const [imgError, setImgError] = useState(false);
   const { container, text } = sizeClasses[size];
   const initials = `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();

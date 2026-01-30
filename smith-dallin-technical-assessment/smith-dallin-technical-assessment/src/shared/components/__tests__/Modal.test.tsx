@@ -91,11 +91,6 @@ describe("Modal", () => {
     it("does not render footer section when not provided", () => {
       render(<Modal {...defaultProps} />);
 
-      // Check there's no footer border-t element beyond the content
-      const modalContent = screen.getByText("Modal content");
-      const modalContainer = modalContent.closest(".flex-col");
-      const footerSection = modalContainer?.querySelector(".border-t:last-child");
-
       // The only border-t should be on the header, not a footer
       expect(screen.queryByText("Submit")).not.toBeInTheDocument();
     });

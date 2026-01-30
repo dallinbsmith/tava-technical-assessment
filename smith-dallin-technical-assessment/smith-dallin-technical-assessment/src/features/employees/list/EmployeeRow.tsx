@@ -1,9 +1,14 @@
 import { Link } from "react-router-dom";
 import { Building2, ChevronRight, Trash2 } from "lucide-react";
-import { EmployeeRowProps } from "../__types__";
+import { Employee } from "../__types__";
 import Avatar from "./Avatar";
 
-const EmployeeRow = ({ employee: emp, onDelete }: EmployeeRowProps) => {
+type Props = {
+  employee: Employee;
+  onDelete: () => void;
+};
+
+const EmployeeRow = ({ employee: emp, onDelete }: Props) => {
   const isInactive = emp.status === "inactive";
 
   const handleDeleteClick = (e: React.MouseEvent) => {

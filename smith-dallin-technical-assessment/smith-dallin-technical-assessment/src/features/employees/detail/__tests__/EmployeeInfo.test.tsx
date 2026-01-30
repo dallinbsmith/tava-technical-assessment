@@ -1,20 +1,9 @@
 import { describe, it, expect } from "vitest";
 import { render, screen } from "@testing-library/react";
+import { mockEmployee as baseMockEmployee } from "../../../../test/test-utils";
 import EmployeeInfo from "../EmployeeInfo";
 
-const mockEmployee = {
-  id: 1,
-  firstName: "John",
-  lastName: "Doe",
-  email: "john@example.com",
-  title: "Software Engineer",
-  department: "Engineering",
-  dateStarted: "2024-01-15T00:00:00.000Z",
-  quote: "Hello world!",
-  status: "active" as const,
-  avatarUrl: "",
-  squads: ["Alpha", "Beta"],
-};
+const mockEmployee = { ...baseMockEmployee, avatarUrl: "" };
 
 describe("EmployeeInfo", () => {
   describe("contact information", () => {

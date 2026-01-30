@@ -1,7 +1,12 @@
-import { EmployeeHeaderProps } from "../__types__";
+import { Employee } from "../__types__";
 import AvatarUpload from "./AvatarUpload";
 
-const EmployeeHeader = ({ employee, onAvatarUpload }: EmployeeHeaderProps) => {
+type Props = {
+  employee: Employee;
+  onAvatarUpload: (imageUrl: string) => Promise<unknown>;
+};
+
+const EmployeeHeader = ({ employee, onAvatarUpload }: Props) => {
   const isInactive = employee.status === "inactive";
 
   return (

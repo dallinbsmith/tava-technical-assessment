@@ -2,7 +2,16 @@ import { useState, useEffect } from "react";
 import { Check } from "lucide-react";
 import { cn } from "../../../shared/lib/styles";
 import { Modal } from "../../../shared/components/Modal";
-import { AssignmentModalProps } from "../__types__";
+
+type Props = {
+  isOpen: boolean;
+  onClose: () => void;
+  departments: string[];
+  squads: string[];
+  selectedDepartment: string;
+  selectedSquads: string[];
+  onSave: (department: string, squads: string[]) => void;
+};
 
 const AssignmentModal = ({
   isOpen,
@@ -12,7 +21,7 @@ const AssignmentModal = ({
   selectedDepartment,
   selectedSquads,
   onSave,
-}: AssignmentModalProps) => {
+}: Props) => {
   const [department, setDepartment] = useState(selectedDepartment);
   const [assignedSquads, setAssignedSquads] =
     useState<string[]>(selectedSquads);

@@ -2,12 +2,26 @@ import { useState, useEffect } from "react";
 import { Filter } from "lucide-react";
 import { cn } from "../../../shared/lib/styles";
 import { Modal } from "../../../shared/components/Modal";
-import {
-  FilterModalProps,
-  SortField,
-  SortOrder,
-  StatusFilter,
-} from "../__types__";
+import { SortField, SortOrder, StatusFilter } from "../__types__";
+
+type Props = {
+  isOpen: boolean;
+  onClose: () => void;
+  departments: string[];
+  squads: string[];
+  selectedDepartments: string[];
+  selectedSquads: string[];
+  sortField: SortField;
+  sortOrder: SortOrder;
+  statusFilter: StatusFilter;
+  onApply: (
+    departments: string[],
+    squads: string[],
+    sortField: SortField,
+    sortOrder: SortOrder,
+    statusFilter: StatusFilter,
+  ) => void;
+};
 
 const sortOptions: { value: SortField; label: string }[] = [
   { value: "firstName", label: "First Name" },
@@ -31,7 +45,7 @@ const FilterModal = ({
   sortOrder,
   statusFilter,
   onApply,
-}: FilterModalProps) => {
+}: Props) => {
   const [localDepartments, setLocalDepartments] =
     useState<string[]>(selectedDepartments);
   const [localSquads, setLocalSquads] = useState<string[]>(selectedSquads);

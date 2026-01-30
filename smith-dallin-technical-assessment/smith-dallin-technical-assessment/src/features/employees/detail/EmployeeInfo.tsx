@@ -1,5 +1,9 @@
 import { Mail, Building2, Calendar } from "lucide-react";
-import { EmployeeInfoProps } from "../__types__";
+import { Employee } from "../__types__";
+
+type Props = {
+  employee: Employee;
+};
 
 const formatDate = (dateString?: string) =>
   dateString
@@ -31,7 +35,7 @@ const InfoItem = ({
   </div>
 );
 
-const EmployeeInfo = ({ employee }: EmployeeInfoProps) => (
+const EmployeeInfo = ({ employee }: Props) => (
   <div className="p-8">
     <div className="grid gap-6 sm:grid-cols-2">
       <div className="space-y-6">
