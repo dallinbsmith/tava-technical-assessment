@@ -1,7 +1,7 @@
 import { useState, useDeferredValue, useMemo } from "react";
 import { Link, useLoaderData } from "react-router-dom";
 import { Users, X, Building2 } from "lucide-react";
-import { useEmployeesQuery, useDeleteEmployeeMutation } from "../queries";
+import { useEmployeesQuery, useDeleteEmployeeMutation } from "../api/queries";
 import {
   Employee,
   ReferenceData,
@@ -16,7 +16,7 @@ import EmployeeRow from "./EmployeeRow";
 import EmployeeSearchBar from "./EmployeeSearchBar";
 import EmployeeControls from "./EmployeeControls";
 import ActiveFilters from "./ActiveFilters";
-import DeleteConfirmationModal from "../shared/DeleteConfirmationModal";
+import DeleteConfirmationModal from "../../../shared/components/DeleteConfirmationModal";
 
 const ITEMS_PER_PAGE_OPTIONS = [6, 9, 12, 24];
 

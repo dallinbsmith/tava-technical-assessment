@@ -5,10 +5,10 @@ import {
   useEmployeeQuery,
   useDeleteEmployeeMutation,
   useAvatarMutation,
-} from "../queries";
+} from "../api/queries";
 import EmployeeHeader from "./EmployeeHeader";
 import EmployeeInfo from "./EmployeeInfo";
-import DeleteConfirmationModal from "../shared/DeleteConfirmationModal";
+import DeleteConfirmationModal from "../../../shared/components/DeleteConfirmationModal";
 
 const EmployeeDetailPage = () => {
   const { id } = useParams<{ id: string }>();

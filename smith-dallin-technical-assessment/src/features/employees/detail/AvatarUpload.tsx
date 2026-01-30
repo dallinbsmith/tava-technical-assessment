@@ -2,7 +2,7 @@ import { useState, useRef } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { Camera, Upload, X, Loader2, Check } from "lucide-react";
 import { cn } from "../../../shared/lib/styles";
-import { uploadAvatar } from "../api";
+import { uploadAvatar } from "../api/api";
 import Avatar from "../list/Avatar";
 import { AvatarUploadProps } from "../__types__";
 

@@ -1,5 +1,5 @@
 import { AlertTriangle, Trash2, Loader2 } from "lucide-react";
-import { Modal } from "../../../shared/components/Modal";
+import { Modal } from "./Modal";
 import { DeleteConfirmationModalProps } from "../__types__";
 
 const DeleteConfirmationModal = ({

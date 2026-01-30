@@ -1,5 +1,5 @@
 import { useLoaderData, useParams } from "react-router-dom";
-import { useUpdateEmployeeMutation } from "../queries";
+import { useUpdateEmployeeMutation } from "../api/queries";
 import { EmployeeFormData, EditLoaderData } from "../__types__";
 import EmployeeForm from "./EmployeeForm";
 

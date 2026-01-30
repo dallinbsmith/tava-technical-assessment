@@ -198,16 +198,3 @@ export type InputProps = InputHTMLAttributes<HTMLInputElement> & {
 export type TextAreaProps = TextareaHTMLAttributes<HTMLTextAreaElement> & {
   error?: boolean;
 };
-
-// =============================================================================
-// Component Props Types - Shared
-// =============================================================================
-
-export type DeleteConfirmationModalProps = {
-  isOpen: boolean;
-  onClose: () => void;
-  onConfirm: () => void;
-  isDeleting: boolean;
-  employeeName: string;
-  error?: string | null;
-};

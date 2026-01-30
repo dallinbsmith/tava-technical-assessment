@@ -3,7 +3,7 @@ import { render, screen, waitFor } from "../../../test/test-utils";
 import userEvent from "@testing-library/user-event";
 import EmployeeListPage from "./EmployeeListPage";
 import * as reactRouterDom from "react-router-dom";
-import * as queries from "../queries";
+import * as queries from "../api/queries";
 
 vi.mock("react-router-dom", async () => {
   const actual = await vi.importActual("react-router-dom");
@@ -13,14 +13,10 @@ vi.mock("react-router-dom", async () => {
   };
 });
 
-vi.mock("../queries", async () => {
-  const actual = await vi.importActual("../queries");
-  return {
-    ...actual,
-    useEmployeesQuery: vi.fn(),
-    useDeleteEmployeeMutation: vi.fn(),
-  };
-});
+vi.mock("../api/queries", () => ({
+  useEmployeesQuery: vi.fn(),
+  useDeleteEmployeeMutation: vi.fn(),
+}));
 
 const mockEmployees = [
   {

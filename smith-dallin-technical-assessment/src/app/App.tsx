@@ -9,7 +9,7 @@ import {
   getDepartments,
   getSquads,
   getEmployee,
-} from "../features/employees/api";
+} from "../features/employees/api/api";
 
 const queryClient = new QueryClient({
   defaultOptions: {

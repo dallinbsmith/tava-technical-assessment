@@ -7,7 +7,7 @@ import {
   updateEmployee,
   deleteEmployee,
 } from "./api";
-import { EmployeeFormData, EmployeeFilters } from "./__types__";
+import { EmployeeFormData, EmployeeFilters } from "../__types__";
 
 export const employeeKeys = {
   all: ["employees"] as const,

@@ -9,3 +9,12 @@ export type ModalProps = {
   footer?: ReactNode;
   icon?: LucideIcon;
 };
+
+export type DeleteConfirmationModalProps = {
+  isOpen: boolean;
+  onClose: () => void;
+  onConfirm: () => void;
+  isDeleting: boolean;
+  employeeName: string;
+  error?: string | null;
+};
