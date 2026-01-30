@@ -112,12 +112,14 @@ export const sortEmployees = (employees, { sort, order }) => {
 };
 
 export const paginateEmployees = (employees, { page, limit }) => {
-  const total = employees.length;
-  const p = parseInt(page, 10) || 1;
-  const l = parseInt(limit, 10) || total;
-  const paginated = employees.slice((p - 1) * l, p * l);
+  const totalCount = employees.length;
+  const currentPage = parseInt(page, 10) || 1;
+  const pageSize = parseInt(limit, 10) || totalCount;
+  const startIndex = (currentPage - 1) * pageSize;
+  const endIndex = currentPage * pageSize;
+  const pageData = employees.slice(startIndex, endIndex);
 
-  return { data: paginated, total, page: p, limit: l };
+  return { data: pageData, total: totalCount, page: currentPage, limit: pageSize };
 };
 
 export const getAllEmployees = async (query) => {
@@ -143,11 +145,12 @@ export const getEmployeeById = async (id) => {
 
 export const getDepartments = async () => {
   const data = await readData();
-  const fromEmployees = data.employees
-    .map((emp) => emp.department)
-    .filter(Boolean);
-  const stored = data.departments || [];
-  return [...new Set([...stored, ...fromEmployees])].sort();
+  const departments = data.employees.reduce((set, emp) => {
+    if (emp.department) set.add(emp.department);
+    return set;
+  }, new Set(data.departments || []));
+
+  return [...departments].sort();
 };
 
 export const getSquads = async () => {
@@ -156,34 +159,46 @@ export const getSquads = async () => {
 };
 
 export const createEmployee = async (employeeData) => {
+  const {
+    firstName,
+    lastName,
+    email = "",
+    title = "",
+    department,
+    dateStarted = new Date().toISOString(),
+    quote = "",
+    status = "active",
+    avatarUrl = "",
+    squads: requestedSquads = [],
+  } = employeeData;
+
   const data = await readData();
-  const newId =
-    data.employees.length > 0
-      ? Math.max(...data.employees.map((emp) => emp.id)) + 1
-      : 1;
+  const newId = Math.max(0, ...data.employees.map((e) => e.id)) + 1;
 
   const newEmployee = {
     id: newId,
-    firstName: employeeData.firstName.trim(),
-    lastName: employeeData.lastName.trim(),
-    email: employeeData.email?.trim() || "",
-    title: employeeData.title?.trim() || "",
-    department: employeeData.department.trim(),
-    dateStarted: employeeData.dateStarted || new Date().toISOString(),
-    quote: employeeData.quote?.trim() || "",
-    status: employeeData.status || "active",
-    avatarUrl: employeeData.avatarUrl || "",
+    firstName: firstName.trim(),
+    lastName: lastName.trim(),
+    email: email.trim(),
+    title: title.trim(),
+    department: department.trim(),
+    dateStarted,
+    quote: quote.trim(),
+    status,
+    avatarUrl,
   };
 
   data.employees.push(newEmployee);
 
-  const requestedSquads = employeeData.squads || [];
-  for (const squadName of requestedSquads) {
-    const squad = data.squads.find((sq) => sq.name === squadName);
-    if (squad) {
-      data.employeeSquads.push({ employeeId: newId, squadId: squad.id });
+  const squadIdByName = Object.fromEntries(
+    data.squads.map(({ id, name }) => [name, id])
+  );
+  requestedSquads.reduce((links, name) => {
+    if (squadIdByName[name]) {
+      links.push({ employeeId: newId, squadId: squadIdByName[name] });
     }
-  }
+    return links;
+  }, data.employeeSquads);
 
   await writeData(data);
   return { ...newEmployee, squads: requestedSquads };
@@ -211,12 +226,15 @@ export const updateEmployee = async (id, employeeData) => {
       (es) => es.employeeId !== parsedId,
     );
 
-    for (const squadName of requestedSquads) {
-      const squad = data.squads.find((sq) => sq.name === squadName);
-      if (squad) {
-        data.employeeSquads.push({ employeeId: parsedId, squadId: squad.id });
+    const squadIdByName = Object.fromEntries(
+      data.squads.map(({ id, name }) => [name, id])
+    );
+    requestedSquads.reduce((links, name) => {
+      if (squadIdByName[name]) {
+        links.push({ employeeId: parsedId, squadId: squadIdByName[name] });
       }
-    }
+      return links;
+    }, data.employeeSquads);
   }
 
   await writeData(data);
@@ -236,16 +254,22 @@ export const deleteEmployee = async (id) => {
   }
 
   const deletedEmployee = data.employees.splice(index, 1)[0];
-  const squadIds = data.employeeSquads
-    .filter((es) => es.employeeId === parsedId)
-    .map((es) => es.squadId);
-  const squadNames = data.squads
-    .filter((sq) => squadIds.includes(sq.id))
-    .map((sq) => sq.name);
 
-  data.employeeSquads = data.employeeSquads.filter(
-    (es) => es.employeeId !== parsedId,
+  const squadNameById = Object.fromEntries(
+    data.squads.map(({ id, name }) => [id, name])
   );
+
+  const { squadNames, remainingLinks } = data.employeeSquads.reduce(
+    (acc, es) => {
+      es.employeeId === parsedId
+        ? acc.squadNames.push(squadNameById[es.squadId])
+        : acc.remainingLinks.push(es);
+      return acc;
+    },
+    { squadNames: [], remainingLinks: [] }
+  );
+
+  data.employeeSquads = remainingLinks;
 
   await writeData(data);
   return { ...deletedEmployee, squads: squadNames };
