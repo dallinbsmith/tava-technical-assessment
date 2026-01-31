@@ -1,9 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, waitFor } from "../../../../test/test-utils";
+import { render, screen, waitFor, mockEmployee } from "@test/test-utils";
 import userEvent from "@testing-library/user-event";
-import EmployeeDetailPage from "../EmployeeDetailPage";
+import EmployeeDetailPage from "../../EmployeeDetailPage";
 import * as reactRouterDom from "react-router-dom";
-import * as queries from "../../../../shared/lib/queries";
+import * as queries from "@shared/lib/queries";
 
 vi.mock("react-router-dom", async () => {
   const actual = await vi.importActual("react-router-dom");
@@ -14,8 +14,8 @@ vi.mock("react-router-dom", async () => {
   };
 });
 
-vi.mock("../../../../shared/lib/queries", async () => {
-  const actual = await vi.importActual("../../../../shared/lib/queries");
+vi.mock("@shared/lib/queries", async () => {
+  const actual = await vi.importActual("@shared/lib/queries");
   return {
     ...actual,
     useEmployeeQuery: vi.fn(),
@@ -23,20 +23,6 @@ vi.mock("../../../../shared/lib/queries", async () => {
     useAvatarMutation: vi.fn(),
   };
 });
-
-const mockEmployee = {
-  id: 1,
-  firstName: "John",
-  lastName: "Doe",
-  email: "john@example.com",
-  title: "Software Engineer",
-  department: "Engineering",
-  dateStarted: "2024-01-15T00:00:00.000Z",
-  quote: "Hello world!",
-  status: "active" as const,
-  avatarUrl: "https://example.com/avatar.jpg",
-  squads: ["Alpha", "Beta"],
-};
 
 describe("EmployeeDetailPage", () => {
   const mockNavigate = vi.fn();

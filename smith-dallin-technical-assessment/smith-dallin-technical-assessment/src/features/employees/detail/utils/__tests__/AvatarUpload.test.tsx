@@ -1,11 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { createQueryWrapper } from "../../../../test/test-utils";
-import AvatarUpload from "../AvatarUpload";
-import * as api from "../../../../shared/lib/api";
+import { createQueryWrapper } from "@test/test-utils";
+import AvatarUpload from "../../AvatarUpload";
+import * as api from "@shared/lib/api";
 
-vi.mock("../../../../shared/lib/api", () => ({
+vi.mock("@shared/lib/api", () => ({
   uploadAvatar: vi.fn(),
 }));
 
@@ -22,7 +22,9 @@ describe("AvatarUpload", () => {
 
   describe("rendering", () => {
     it("displays initials when no avatar URL", () => {
-      render(<AvatarUpload {...defaultProps} />, { wrapper: createQueryWrapper() });
+      render(<AvatarUpload {...defaultProps} />, {
+        wrapper: createQueryWrapper(),
+      });
 
       expect(screen.getByText("JD")).toBeInTheDocument();
     });
@@ -41,7 +43,9 @@ describe("AvatarUpload", () => {
     });
 
     it("shows upload button", () => {
-      render(<AvatarUpload {...defaultProps} />, { wrapper: createQueryWrapper() });
+      render(<AvatarUpload {...defaultProps} />, {
+        wrapper: createQueryWrapper(),
+      });
 
       expect(screen.getByTitle("Upload image")).toBeInTheDocument();
     });
@@ -60,9 +64,13 @@ describe("AvatarUpload", () => {
 
   describe("file input", () => {
     it("has file input with image accept attribute", () => {
-      render(<AvatarUpload {...defaultProps} />, { wrapper: createQueryWrapper() });
+      render(<AvatarUpload {...defaultProps} />, {
+        wrapper: createQueryWrapper(),
+      });
 
-      const input = document.querySelector('input[type="file"]') as HTMLInputElement;
+      const input = document.querySelector(
+        'input[type="file"]',
+      ) as HTMLInputElement;
       expect(input).toBeInTheDocument();
       expect(input).toHaveAttribute("accept", "image/*");
     });
@@ -71,15 +79,18 @@ describe("AvatarUpload", () => {
   describe("file upload", () => {
     it("calls uploadAvatar and onUpload on valid file", async () => {
       const onUpload = vi.fn().mockResolvedValue(undefined);
-      vi.mocked(api.uploadAvatar).mockResolvedValue("https://example.com/new-avatar.jpg");
-
-      const user = userEvent.setup();
-      render(
-        <AvatarUpload {...defaultProps} onUpload={onUpload} />,
-        { wrapper: createQueryWrapper() },
+      vi.mocked(api.uploadAvatar).mockResolvedValue(
+        "https://example.com/new-avatar.jpg",
       );
 
-      const input = document.querySelector('input[type="file"]') as HTMLInputElement;
+      const user = userEvent.setup();
+      render(<AvatarUpload {...defaultProps} onUpload={onUpload} />, {
+        wrapper: createQueryWrapper(),
+      });
+
+      const input = document.querySelector(
+        'input[type="file"]',
+      ) as HTMLInputElement;
       const file = new File(["test"], "avatar.jpg", { type: "image/jpeg" });
 
       await user.upload(input, file);
@@ -89,7 +100,9 @@ describe("AvatarUpload", () => {
       });
 
       await waitFor(() => {
-        expect(onUpload).toHaveBeenCalledWith("https://example.com/new-avatar.jpg");
+        expect(onUpload).toHaveBeenCalledWith(
+          "https://example.com/new-avatar.jpg",
+        );
       });
     });
 
@@ -99,9 +112,13 @@ describe("AvatarUpload", () => {
       );
 
       const user = userEvent.setup();
-      render(<AvatarUpload {...defaultProps} />, { wrapper: createQueryWrapper() });
+      render(<AvatarUpload {...defaultProps} />, {
+        wrapper: createQueryWrapper(),
+      });
 
-      const input = document.querySelector('input[type="file"]') as HTMLInputElement;
+      const input = document.querySelector(
+        'input[type="file"]',
+      ) as HTMLInputElement;
       const file = new File(["test"], "avatar.jpg", { type: "image/jpeg" });
 
       await user.upload(input, file);
@@ -113,9 +130,13 @@ describe("AvatarUpload", () => {
       vi.mocked(api.uploadAvatar).mockRejectedValue(new Error("Upload failed"));
 
       const user = userEvent.setup();
-      render(<AvatarUpload {...defaultProps} />, { wrapper: createQueryWrapper() });
+      render(<AvatarUpload {...defaultProps} />, {
+        wrapper: createQueryWrapper(),
+      });
 
-      const input = document.querySelector('input[type="file"]') as HTMLInputElement;
+      const input = document.querySelector(
+        'input[type="file"]',
+      ) as HTMLInputElement;
       const file = new File(["test"], "avatar.jpg", { type: "image/jpeg" });
 
       await user.upload(input, file);
@@ -131,9 +152,13 @@ describe("AvatarUpload", () => {
       vi.mocked(api.uploadAvatar).mockRejectedValue(new Error("Upload failed"));
 
       const user = userEvent.setup();
-      render(<AvatarUpload {...defaultProps} />, { wrapper: createQueryWrapper() });
+      render(<AvatarUpload {...defaultProps} />, {
+        wrapper: createQueryWrapper(),
+      });
 
-      const input = document.querySelector('input[type="file"]') as HTMLInputElement;
+      const input = document.querySelector(
+        'input[type="file"]',
+      ) as HTMLInputElement;
       const file = new File(["test"], "avatar.jpg", { type: "image/jpeg" });
 
       await user.upload(input, file);
@@ -143,7 +168,8 @@ describe("AvatarUpload", () => {
       });
 
       // Find and click the close button on the error
-      const closeButton = screen.getByText("Upload failed")
+      const closeButton = screen
+        .getByText("Upload failed")
         .closest("div")
         ?.querySelector("button");
 

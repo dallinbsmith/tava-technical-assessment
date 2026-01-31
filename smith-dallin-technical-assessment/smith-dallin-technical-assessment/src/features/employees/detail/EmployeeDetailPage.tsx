@@ -1,32 +1,29 @@
-import { useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { ArrowLeft, Pencil, Trash2, Loader2 } from "lucide-react";
-import {
-  useEmployeeQuery,
-  useDeleteEmployeeMutation,
-  useAvatarMutation,
-} from "../../../shared/lib/queries";
+import { useEmployeeQuery, useAvatarMutation } from "@shared/lib/queries";
+import { useDeleteConfirmation } from "@shared/hooks/useDeleteConfirmation";
 import EmployeeHeader from "./EmployeeHeader";
 import EmployeeInfo from "./EmployeeInfo";
-import DeleteConfirmationModal from "../../../shared/components/DeleteConfirmationModal";
+import DeleteConfirmationModal from "@shared/components/DeleteConfirmationModal";
 
 const EmployeeDetailPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const employeeId = parseInt(id!);
 
-  const [deleteTarget, setDeleteTarget] = useState<{
-    id: number;
-    name: string;
-  } | null>(null);
-
   const { data: employee, isLoading, error } = useEmployeeQuery(employeeId);
+  const avatarMutation = useAvatarMutation(employeeId);
 
-  const deleteMutation = useDeleteEmployeeMutation({
+  const {
+    deleteTarget,
+    isDeleting,
+    deleteError,
+    openDeleteConfirmation,
+    closeDeleteConfirmation,
+    confirmDelete,
+  } = useDeleteConfirmation({
     onSuccess: () => navigate("/"),
   });
-
-  const avatarMutation = useAvatarMutation(employeeId);
 
   if (isLoading) {
     return (
@@ -73,10 +70,10 @@ const EmployeeDetailPage = () => {
           </Link>
           <button
             onClick={() =>
-              setDeleteTarget({
-                id: employee.id,
-                name: `${employee.firstName} ${employee.lastName}`,
-              })
+              openDeleteConfirmation(
+                employee.id,
+                `${employee.firstName} ${employee.lastName}`,
+              )
             }
             className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium bg-red-900/30 text-red-300 border border-red-700/40 hover:bg-red-800/40 transition-colors"
           >
@@ -96,11 +93,11 @@ const EmployeeDetailPage = () => {
 
       <DeleteConfirmationModal
         isOpen={!!deleteTarget}
-        onClose={() => !deleteMutation.isPending && setDeleteTarget(null)}
-        onConfirm={() => deleteTarget && deleteMutation.mutate(deleteTarget.id)}
-        isDeleting={deleteMutation.isPending}
+        onClose={closeDeleteConfirmation}
+        onConfirm={confirmDelete}
+        isDeleting={isDeleting}
         itemName={deleteTarget?.name ?? ""}
-        error={deleteMutation.error?.message ?? null}
+        error={deleteError}
       />
     </div>
   );

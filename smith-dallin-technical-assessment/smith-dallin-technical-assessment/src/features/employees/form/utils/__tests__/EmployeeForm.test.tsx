@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, waitFor } from "../../../../test/test-utils";
+import { render, screen, waitFor } from "@test/test-utils";
 import userEvent from "@testing-library/user-event";
-import EmployeeForm from "../EmployeeForm";
+import EmployeeForm from "../../EmployeeForm";
 
 describe("EmployeeForm", () => {
   const defaultProps = {
@@ -9,7 +9,6 @@ describe("EmployeeForm", () => {
     submitLabel: "Create Employee",
     title: "Add New Employee",
     departments: ["Engineering", "Product", "Design"],
-    squads: ["Alpha", "Beta", "Gamma"],
   };
 
   beforeEach(() => {
@@ -38,8 +37,12 @@ describe("EmployeeForm", () => {
       render(<EmployeeForm {...defaultProps} />);
 
       // Use getAllByRole since there may be multiple buttons with these names
-      const activeButtons = screen.getAllByRole("button", { name: /^active$/i });
-      const inactiveButtons = screen.getAllByRole("button", { name: /^inactive$/i });
+      const activeButtons = screen.getAllByRole("button", {
+        name: /^active$/i,
+      });
+      const inactiveButtons = screen.getAllByRole("button", {
+        name: /^inactive$/i,
+      });
 
       expect(activeButtons.length).toBeGreaterThan(0);
       expect(inactiveButtons.length).toBeGreaterThan(0);
@@ -71,7 +74,6 @@ describe("EmployeeForm", () => {
       quote: "Hello world",
       status: "active" as const,
       avatarUrl: "",
-      squads: ["Alpha"],
     };
 
     it("populates fields with initial data", () => {
@@ -88,13 +90,8 @@ describe("EmployeeForm", () => {
     it("shows department from initial data", () => {
       render(<EmployeeForm {...defaultProps} initialData={initialData} />);
 
-      expect(screen.getByText("Engineering")).toBeInTheDocument();
-    });
-
-    it("shows squads from initial data", () => {
-      render(<EmployeeForm {...defaultProps} initialData={initialData} />);
-
-      expect(screen.getByText("Alpha")).toBeInTheDocument();
+      const select = screen.getByLabelText(/department/i);
+      expect(select).toHaveValue("Engineering");
     });
   });
 
@@ -166,7 +163,6 @@ describe("EmployeeForm", () => {
         quote: "",
         status: "active" as const,
         avatarUrl: "",
-        squads: [],
       };
       render(<EmployeeForm {...defaultProps} initialData={initialData} />);
 
@@ -192,7 +188,9 @@ describe("EmployeeForm", () => {
       await user.type(screen.getByLabelText(/first name/i), "John");
 
       await waitFor(() => {
-        expect(screen.queryByText(/first name is required/i)).not.toBeInTheDocument();
+        expect(
+          screen.queryByText(/first name is required/i),
+        ).not.toBeInTheDocument();
       });
     });
   });
@@ -213,10 +211,15 @@ describe("EmployeeForm", () => {
         quote: "",
         status: "active" as const,
         avatarUrl: "",
-        squads: [],
       };
 
-      render(<EmployeeForm {...defaultProps} onSubmit={onSubmit} initialData={initialData} />);
+      render(
+        <EmployeeForm
+          {...defaultProps}
+          onSubmit={onSubmit}
+          initialData={initialData}
+        />,
+      );
 
       await user.type(screen.getByLabelText(/first name/i), "John");
       await user.type(screen.getByLabelText(/last name/i), "Doe");
@@ -237,9 +240,11 @@ describe("EmployeeForm", () => {
     });
 
     it("shows loading state during submission", async () => {
-      const onSubmit = vi.fn().mockImplementation(
-        () => new Promise((resolve) => setTimeout(resolve, 100)),
-      );
+      const onSubmit = vi
+        .fn()
+        .mockImplementation(
+          () => new Promise((resolve) => setTimeout(resolve, 100)),
+        );
       const user = userEvent.setup();
       const initialData = {
         id: 1,
@@ -252,10 +257,15 @@ describe("EmployeeForm", () => {
         quote: "",
         status: "active" as const,
         avatarUrl: "",
-        squads: [],
       };
 
-      render(<EmployeeForm {...defaultProps} onSubmit={onSubmit} initialData={initialData} />);
+      render(
+        <EmployeeForm
+          {...defaultProps}
+          onSubmit={onSubmit}
+          initialData={initialData}
+        />,
+      );
 
       await user.type(screen.getByLabelText(/first name/i), "John");
       await user.type(screen.getByLabelText(/last name/i), "Doe");
@@ -280,10 +290,15 @@ describe("EmployeeForm", () => {
         quote: "",
         status: "active" as const,
         avatarUrl: "",
-        squads: [],
       };
 
-      render(<EmployeeForm {...defaultProps} onSubmit={onSubmit} initialData={initialData} />);
+      render(
+        <EmployeeForm
+          {...defaultProps}
+          onSubmit={onSubmit}
+          initialData={initialData}
+        />,
+      );
 
       await user.type(screen.getByLabelText(/first name/i), "John");
       await user.type(screen.getByLabelText(/last name/i), "Doe");
@@ -293,35 +308,6 @@ describe("EmployeeForm", () => {
 
       await waitFor(() => {
         expect(screen.getByText("Server error")).toBeInTheDocument();
-      });
-    });
-  });
-
-  describe("assignment modal", () => {
-    it("opens assignment modal when pencil icon is clicked", async () => {
-      const user = userEvent.setup();
-      render(<EmployeeForm {...defaultProps} />);
-
-      // Find the pencil button near Department
-      const pencilButtons = screen.getAllByRole("button").filter(
-        (btn) => btn.querySelector("svg"),
-      );
-      // The first pencil button should be for department
-      const departmentPencil = pencilButtons.find((btn) =>
-        btn.closest(".flex")?.textContent?.includes("Department") ||
-        btn.closest("div")?.previousSibling?.textContent?.includes("Department"),
-      );
-
-      if (departmentPencil) {
-        await user.click(departmentPencil);
-      } else {
-        // Alternative: just click the first pencil-like button
-        const firstPencil = pencilButtons[0];
-        await user.click(firstPencil);
-      }
-
-      await waitFor(() => {
-        expect(screen.getByText("Department & Squads")).toBeInTheDocument();
       });
     });
   });

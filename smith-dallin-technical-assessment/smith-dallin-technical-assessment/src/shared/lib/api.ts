@@ -3,27 +3,84 @@ import {
   EmployeeFormData,
   EmployeesResponse,
   EmployeeFilters,
-} from "../../features/employees/__types__";
+} from "../../features/employees/utils/__types__";
 
 const API_BASE = import.meta.env.VITE_API_URL ?? "http://localhost:3001";
 
-const api = async <T>(url: string, options?: RequestInit): Promise<T> => {
-  const response = await fetch(`${API_BASE}${url}`, options);
-  if (!response.ok) {
-    const error = await response.json().catch(() => ({}));
-    throw new Error(error.error || `Request failed: ${response.status}`);
+export class ApiError extends Error {
+  constructor(
+    message: string,
+    public status: number,
+  ) {
+    super(message);
+    this.name = "ApiError";
   }
-  return response.json();
+}
+
+type ApiOptions = RequestInit & {
+  signal?: AbortSignal;
+};
+
+const api = async <T>(url: string, options?: ApiOptions): Promise<T> => {
+  const fullUrl = `${API_BASE}${url}`;
+
+  try {
+    const response = await fetch(fullUrl, options);
+
+    if (!response.ok) {
+      const errorBody = await response.json().catch(() => ({}));
+      const message =
+        errorBody.error ||
+        errorBody.message ||
+        getDefaultErrorMessage(response.status);
+
+      throw new ApiError(message, response.status);
+    }
+
+    return response.json();
+  } catch (error) {
+    if (error instanceof ApiError) {
+      throw error;
+    }
+
+    if (error instanceof Error) {
+      if (error.name === "AbortError") {
+        throw error;
+      }
+      throw new ApiError(`Network error: ${error.message}`, 0);
+    }
+
+    throw new ApiError("An unexpected error occurred", 0);
+  }
+};
+
+const getDefaultErrorMessage = (status: number): string => {
+  switch (status) {
+    case 400:
+      return "Invalid request";
+    case 401:
+      return "Unauthorized";
+    case 403:
+      return "Forbidden";
+    case 404:
+      return "Not found";
+    case 422:
+      return "Validation error";
+    case 500:
+      return "Server error";
+    default:
+      return `Request failed (${status})`;
+  }
 };
 
 export const getEmployees = async (
   filters: EmployeeFilters = {},
+  signal?: AbortSignal,
 ): Promise<EmployeesResponse> => {
   const params = new URLSearchParams();
   if (filters.search) params.set("search", filters.search);
   if (filters.department?.length)
     params.set("department", filters.department.join(","));
-  if (filters.squad?.length) params.set("squad", filters.squad.join(","));
   if (filters.status && filters.status !== "all")
     params.set("status", filters.status);
   if (filters.sort) params.set("sort", filters.sort);
@@ -32,15 +89,16 @@ export const getEmployees = async (
   if (filters.limit) params.set("limit", String(filters.limit));
 
   const query = params.toString();
-  return api(`/employees${query ? `?${query}` : ""}`);
+  return api(`/employees${query ? `?${query}` : ""}`, { signal });
 };
 
-export const getEmployee = (id: number): Promise<Employee> =>
-  api(`/employees/${id}`);
+export const getEmployee = (
+  id: number,
+  signal?: AbortSignal,
+): Promise<Employee> => api(`/employees/${id}`, { signal });
 
-export const getDepartments = (): Promise<string[]> => api("/departments");
-
-export const getSquads = (): Promise<string[]> => api("/squads");
+export const getDepartments = (signal?: AbortSignal): Promise<string[]> =>
+  api("/departments", { signal });
 
 export const createEmployee = (data: EmployeeFormData): Promise<Employee> =>
   api("/employees", {

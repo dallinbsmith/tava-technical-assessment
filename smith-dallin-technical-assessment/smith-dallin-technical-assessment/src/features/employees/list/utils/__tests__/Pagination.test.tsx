@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import Pagination from "../Pagination";
+import Pagination from "../../Pagination";
 
 describe("Pagination", () => {
   const defaultProps = {
@@ -66,7 +66,11 @@ describe("Pagination", () => {
       const user = userEvent.setup();
 
       render(
-        <Pagination {...defaultProps} currentPage={3} onPageChange={onPageChange} />,
+        <Pagination
+          {...defaultProps}
+          currentPage={3}
+          onPageChange={onPageChange}
+        />,
       );
 
       await user.click(screen.getByTitle("Previous"));
@@ -93,7 +97,11 @@ describe("Pagination", () => {
       const user = userEvent.setup();
 
       render(
-        <Pagination {...defaultProps} currentPage={3} onPageChange={onPageChange} />,
+        <Pagination
+          {...defaultProps}
+          currentPage={3}
+          onPageChange={onPageChange}
+        />,
       );
 
       await user.click(screen.getByTitle("Next"));
@@ -111,7 +119,9 @@ describe("Pagination", () => {
     });
 
     it("handles large page numbers", () => {
-      render(<Pagination {...defaultProps} currentPage={99} totalPages={100} />);
+      render(
+        <Pagination {...defaultProps} currentPage={99} totalPages={100} />,
+      );
 
       expect(screen.getByText("99")).toBeInTheDocument();
       expect(screen.getByText("/ 100")).toBeInTheDocument();

@@ -1,16 +1,14 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import FilterModal from "../FilterModal";
+import FilterModal from "../../FilterModal";
 
 describe("FilterModal", () => {
   const defaultProps = {
     isOpen: true,
     onClose: vi.fn(),
     departments: ["Engineering", "Product", "Design"],
-    squads: ["Alpha", "Beta", "Gamma"],
     selectedDepartments: [] as string[],
-    selectedSquads: [] as string[],
     sortField: "firstName" as const,
     sortOrder: "asc" as const,
     statusFilter: "all" as const,
@@ -40,7 +38,6 @@ describe("FilterModal", () => {
       expect(screen.getByText("Status")).toBeInTheDocument();
       expect(screen.getByText("Sort By")).toBeInTheDocument();
       expect(screen.getByText("Departments")).toBeInTheDocument();
-      expect(screen.getByText("Squads")).toBeInTheDocument();
     });
   });
 
@@ -61,7 +58,6 @@ describe("FilterModal", () => {
       await user.click(screen.getByText("Apply"));
 
       expect(defaultProps.onApply).toHaveBeenCalledWith(
-        [],
         [],
         "firstName",
         "asc",
@@ -94,7 +90,6 @@ describe("FilterModal", () => {
 
       expect(defaultProps.onApply).toHaveBeenCalledWith(
         [],
-        [],
         "lastName",
         "asc",
         "all",
@@ -109,7 +104,6 @@ describe("FilterModal", () => {
       await user.click(screen.getByText("Apply"));
 
       expect(defaultProps.onApply).toHaveBeenCalledWith(
-        [],
         [],
         "firstName",
         "desc",
@@ -136,7 +130,6 @@ describe("FilterModal", () => {
 
       expect(defaultProps.onApply).toHaveBeenCalledWith(
         ["Engineering"],
-        [],
         "firstName",
         "asc",
         "all",
@@ -153,7 +146,6 @@ describe("FilterModal", () => {
 
       expect(defaultProps.onApply).toHaveBeenCalledWith(
         ["Engineering", "Product"],
-        [],
         "firstName",
         "asc",
         "all",
@@ -162,40 +154,11 @@ describe("FilterModal", () => {
 
     it("shows pre-selected departments as checked", () => {
       render(
-        <FilterModal
-          {...defaultProps}
-          selectedDepartments={["Engineering"]}
-        />,
+        <FilterModal {...defaultProps} selectedDepartments={["Engineering"]} />,
       );
 
       const checkbox = screen.getByRole("checkbox", { name: /engineering/i });
       expect(checkbox).toBeChecked();
-    });
-  });
-
-  describe("squad filter", () => {
-    it("displays all squads", () => {
-      render(<FilterModal {...defaultProps} />);
-
-      expect(screen.getByText("Alpha")).toBeInTheDocument();
-      expect(screen.getByText("Beta")).toBeInTheDocument();
-      expect(screen.getByText("Gamma")).toBeInTheDocument();
-    });
-
-    it("can select a squad", async () => {
-      const user = userEvent.setup();
-      render(<FilterModal {...defaultProps} />);
-
-      await user.click(screen.getByText("Alpha"));
-      await user.click(screen.getByText("Apply"));
-
-      expect(defaultProps.onApply).toHaveBeenCalledWith(
-        [],
-        ["Alpha"],
-        "firstName",
-        "asc",
-        "all",
-      );
     });
   });
 
@@ -208,10 +171,7 @@ describe("FilterModal", () => {
 
     it("Clear button is enabled when there are selections", () => {
       render(
-        <FilterModal
-          {...defaultProps}
-          selectedDepartments={["Engineering"]}
-        />,
+        <FilterModal {...defaultProps} selectedDepartments={["Engineering"]} />,
       );
 
       expect(screen.getByText("Clear")).not.toBeDisabled();
@@ -232,7 +192,6 @@ describe("FilterModal", () => {
 
       expect(defaultProps.onApply).toHaveBeenCalledWith(
         [],
-        [],
         "firstName",
         "asc",
         "all",
@@ -246,7 +205,6 @@ describe("FilterModal", () => {
       render(<FilterModal {...defaultProps} />);
 
       await user.click(screen.getByText("Engineering"));
-      await user.click(screen.getByText("Alpha"));
       await user.click(screen.getByText("Last Name"));
       await user.click(screen.getByText("Z → A"));
       await user.click(screen.getByText("Inactive"));
@@ -254,7 +212,6 @@ describe("FilterModal", () => {
 
       expect(defaultProps.onApply).toHaveBeenCalledWith(
         ["Engineering"],
-        ["Alpha"],
         "lastName",
         "desc",
         "inactive",

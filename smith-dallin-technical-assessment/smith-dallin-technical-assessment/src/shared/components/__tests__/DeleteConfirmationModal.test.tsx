@@ -39,12 +39,16 @@ describe("DeleteConfirmationModal", () => {
         screen.getByText("This action cannot be undone."),
       ).toBeInTheDocument();
       expect(
-        screen.getByText("This will permanently remove this item from the system."),
+        screen.getByText(
+          "This will permanently remove this item from the system.",
+        ),
       ).toBeInTheDocument();
     });
 
     it("displays item name in confirmation message", () => {
-      render(<DeleteConfirmationModal {...defaultProps} itemName="Jane Smith" />);
+      render(
+        <DeleteConfirmationModal {...defaultProps} itemName="Jane Smith" />,
+      );
 
       expect(
         screen.getByText(/Are you sure you want to remove/),
@@ -66,9 +70,7 @@ describe("DeleteConfirmationModal", () => {
     it("does not display error when null", () => {
       render(<DeleteConfirmationModal {...defaultProps} error={null} />);
 
-      expect(
-        screen.queryByText("Failed to delete"),
-      ).not.toBeInTheDocument();
+      expect(screen.queryByText("Failed to delete")).not.toBeInTheDocument();
     });
   });
 
@@ -95,7 +97,9 @@ describe("DeleteConfirmationModal", () => {
       const onConfirm = vi.fn();
       const user = userEvent.setup();
 
-      render(<DeleteConfirmationModal {...defaultProps} onConfirm={onConfirm} />);
+      render(
+        <DeleteConfirmationModal {...defaultProps} onConfirm={onConfirm} />,
+      );
 
       await user.click(screen.getByText("Remove"));
 
@@ -143,7 +147,9 @@ describe("DeleteConfirmationModal", () => {
       const onConfirm = vi.fn();
       const user = userEvent.setup();
 
-      render(<DeleteConfirmationModal {...defaultProps} onConfirm={onConfirm} />);
+      render(
+        <DeleteConfirmationModal {...defaultProps} onConfirm={onConfirm} />,
+      );
 
       const removeButton = screen.getByText("Remove");
       removeButton.focus();

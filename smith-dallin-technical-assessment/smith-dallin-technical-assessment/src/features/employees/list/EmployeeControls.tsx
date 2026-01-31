@@ -1,19 +1,11 @@
 import { Filter, LayoutGrid, List, Building2 } from "lucide-react";
-import { cn } from "../../../shared/lib/styles";
-import { ViewMode } from "../__types__";
-
-type Props = {
-  viewMode: ViewMode;
-  onViewModeChange: (mode: ViewMode) => void;
-  onOpenFilters: () => void;
-  activeFilterCount: number;
-  groupByDepartment: boolean;
-  onGroupByDepartmentChange: (grouped: boolean) => void;
-};
+import { cn } from "@shared/lib/styles";
+import { EmployeeControlsProps } from "./utils/__types__";
 
 const viewModes = [
   { mode: "grid" as const, icon: LayoutGrid, label: "Grid" },
   { mode: "list" as const, icon: List, label: "List" },
+  { mode: "group" as const, icon: Building2, label: "Group by department" },
 ];
 
 const EmployeeControls = ({
@@ -23,7 +15,7 @@ const EmployeeControls = ({
   activeFilterCount,
   groupByDepartment,
   onGroupByDepartmentChange,
-}: Props) => (
+}: EmployeeControlsProps) => (
   <div className="flex flex-wrap gap-2 sm:gap-3">
     <button
       onClick={onOpenFilters}
@@ -43,37 +35,33 @@ const EmployeeControls = ({
       )}
     </button>
 
-    <button
-      onClick={() => onGroupByDepartmentChange(!groupByDepartment)}
-      className={cn(
-        "flex items-center gap-2 px-3 py-2 text-sm border transition-colors",
-        groupByDepartment
-          ? "border-sky-500/50 bg-sky-900/30 text-sky-300"
-          : "border-border bg-elevated text-muted hover:border-sky-500/50",
-      )}
-      title="Group by department"
-    >
-      <Building2 className="w-4 h-4" />
-      <span className="hidden sm:inline">Group</span>
-    </button>
-
     <div className="flex border border-border overflow-hidden bg-elevated">
-      {viewModes.map(({ mode, icon: Icon, label }) => (
-        <button
-          key={mode}
-          onClick={() => onViewModeChange(mode)}
-          className={cn(
-            "p-2 transition-colors",
-            mode !== "grid" && "border-l border-border",
-            viewMode === mode
-              ? "bg-sky-900/40 text-sky-300"
-              : "text-muted hover:bg-surface",
-          )}
-          title={label}
-        >
-          <Icon className="w-4 h-4" />
-        </button>
-      ))}
+      {viewModes.map(({ mode, icon: Icon, label }, index) => {
+        const isLast = index === viewModes.length - 1;
+        const isActive =
+          mode === "group" ? groupByDepartment : viewMode === mode;
+        const handleClick =
+          mode === "group"
+            ? () => onGroupByDepartmentChange(!groupByDepartment)
+            : () => onViewModeChange(mode as "grid" | "list");
+
+        return (
+          <button
+            key={mode}
+            onClick={handleClick}
+            className={cn(
+              "p-2 transition-colors",
+              !isLast && "border-r border-border",
+              isActive
+                ? "bg-sky-900/40 text-sky-300"
+                : "text-muted hover:bg-surface",
+            )}
+            title={label}
+          >
+            <Icon className="w-4 h-4" />
+          </button>
+        );
+      })}
     </div>
   </div>
 );

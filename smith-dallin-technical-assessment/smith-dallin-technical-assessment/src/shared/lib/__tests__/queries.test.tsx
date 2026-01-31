@@ -2,11 +2,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderHook, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { MemoryRouter } from "react-router-dom";
-import {
-  employeeKeys,
-  useEmployeesQuery,
-  useEmployeeQuery,
-} from "../queries";
+import { employeeKeys, useEmployeesQuery, useEmployeeQuery } from "../queries";
 import * as api from "../api";
 
 vi.mock("../api");
@@ -22,7 +18,6 @@ const mockEmployee = {
   quote: "Hello",
   status: "active" as const,
   avatarUrl: "",
-  squads: ["Alpha"],
 };
 
 const createWrapper = () => {
@@ -47,11 +42,11 @@ describe("employeeKeys", () => {
 
   it("generates correct key for employee list with filters", () => {
     const filters = { search: "john", page: 1 };
-    expect(employeeKeys.list(filters)).toEqual(["employees", filters]);
+    expect(employeeKeys.list(filters)).toEqual(["employees", "list", filters]);
   });
 
   it("generates correct key for employee detail", () => {
-    expect(employeeKeys.detail(1)).toEqual(["employee", 1]);
+    expect(employeeKeys.detail(1)).toEqual(["employees", "detail", 1]);
   });
 });
 

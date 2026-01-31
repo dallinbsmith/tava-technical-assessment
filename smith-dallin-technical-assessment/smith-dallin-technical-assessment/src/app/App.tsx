@@ -5,15 +5,12 @@ import {
   Link,
   Outlet,
 } from "react-router-dom";
-import tavaLogo from "../assets/tava-logo.svg";
-import EmployeeListPage from "../features/employees/list/EmployeeListPage";
-import EmployeeDetailPage from "../features/employees/detail/EmployeeDetailPage";
-import EmployeeFormPage from "../features/employees/form/EmployeeFormPage";
-import {
-  getDepartments,
-  getSquads,
-  getEmployee,
-} from "../shared/lib/api";
+import tavaLogo from "@/assets/tava-logo.svg";
+import EmployeeListPage from "@features/employees/list/EmployeeListPage";
+import EmployeeDetailPage from "@features/employees/detail/EmployeeDetailPage";
+import EmployeeFormPage from "@features/employees/form/EmployeeFormPage";
+import ErrorBoundary from "@shared/components/ErrorBoundary";
+import { getDepartments, getEmployee } from "@shared/lib/api";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -25,20 +22,16 @@ const queryClient = new QueryClient({
 });
 
 const referenceDataLoader = async () => {
-  const [departments, squads] = await Promise.all([
-    getDepartments(),
-    getSquads(),
-  ]);
-  return { departments, squads };
+  const departments = await getDepartments();
+  return { departments };
 };
 
 const editLoader = async ({ params }: { params: { id?: string } }) => {
-  const [departments, squads, employee] = await Promise.all([
+  const [departments, employee] = await Promise.all([
     getDepartments(),
-    getSquads(),
     getEmployee(parseInt(params.id!)),
   ]);
-  return { departments, squads, employee };
+  return { departments, employee };
 };
 
 const Layout = () => (
@@ -65,7 +58,9 @@ const Layout = () => (
       </div>
     </header>
     <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <Outlet />
+      <ErrorBoundary>
+        <Outlet />
+      </ErrorBoundary>
     </main>
   </div>
 );

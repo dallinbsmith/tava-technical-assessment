@@ -1,9 +1,5 @@
 import { Mail, Building2, Calendar } from "lucide-react";
-import { Employee } from "../__types__";
-
-type Props = {
-  employee: Employee;
-};
+import { EmployeeInfoProps } from "./utils/__types__";
 
 const formatDate = (dateString?: string) =>
   dateString
@@ -35,60 +31,60 @@ const InfoItem = ({
   </div>
 );
 
-const EmployeeInfo = ({ employee }: Props) => (
-  <div className="p-8">
-    <div className="grid gap-6 sm:grid-cols-2">
-      <div className="space-y-6">
-        <div>
-          <h2 className="text-sm font-medium text-muted uppercase tracking-wide mb-3">
-            Contact Information
-          </h2>
-          <InfoItem icon={Mail} label="Email" value={employee.email} />
-        </div>
+const EmployeeInfo = ({ employee }: EmployeeInfoProps) => {
+  const { id, email, department, quote, dateStarted } = employee;
 
-        <div>
-          <h2 className="text-sm font-medium text-muted uppercase tracking-wide mb-3">
-            Work Information
-          </h2>
-          <div className="flex items-center gap-3 text-sm text-muted">
-            <Building2 className="w-4 h-4" />
-            <span>{employee.department || "Not assigned"}</span>
+  return (
+    <div className="p-8">
+      <div className="grid gap-6 sm:grid-cols-2">
+        <div className="space-y-6">
+          <div>
+            <h2 className="text-sm font-medium text-muted uppercase tracking-wide mb-3">
+              Contact Information
+            </h2>
+            <InfoItem icon={Mail} label="Email" value={email} />
           </div>
+
+          <div>
+            <h2 className="text-sm font-medium text-muted uppercase tracking-wide mb-3">
+              Work Information
+            </h2>
+            <div className="flex items-center gap-3 text-sm text-muted">
+              <Building2 className="w-4 h-4" />
+              <span>{department || "Not assigned"}</span>
+            </div>
+          </div>
+
+          {quote && <p className="text-muted italic">"{quote}"</p>}
         </div>
 
-        {employee.quote && (
-          <p className="text-muted italic">"{employee.quote}"</p>
-        )}
-      </div>
+        <div className="space-y-6">
+          <div>
+            <h2 className="text-sm font-medium text-muted uppercase tracking-wide mb-3">
+              Employment Details
+            </h2>
+            <InfoItem
+              icon={Calendar}
+              label="Start Date"
+              value={formatDate(dateStarted)}
+            />
+          </div>
 
-      <div className="space-y-6">
-        <div>
-          <h2 className="text-sm font-medium text-muted uppercase tracking-wide mb-3">
-            Employment Details
-          </h2>
-          <InfoItem
-            icon={Calendar}
-            label="Start Date"
-            value={formatDate(employee.dateStarted)}
-          />
-        </div>
-
-        <div>
-          <h2 className="text-sm font-medium text-muted uppercase tracking-wide mb-3">
-            Employee Information
-          </h2>
-          <div className="bg-elevated p-4 space-y-2">
-            <div className="flex justify-between">
-              <span className="text-sm text-muted">Employee ID</span>
-              <span className="text-sm font-mono text-primary">
-                {employee.id}
-              </span>
+          <div>
+            <h2 className="text-sm font-medium text-muted uppercase tracking-wide mb-3">
+              Employee Information
+            </h2>
+            <div className="bg-elevated p-4 space-y-2">
+              <div className="flex justify-between">
+                <span className="text-sm text-muted">Employee ID</span>
+                <span className="text-sm font-mono text-primary">{id}</span>
+              </div>
             </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
-);
+  );
+};
 
 export default EmployeeInfo;

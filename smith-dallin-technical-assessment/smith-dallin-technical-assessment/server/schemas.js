@@ -10,7 +10,6 @@ export const employeeCreateSchema = z.object({
   quote: z.string().optional(),
   status: z.enum(["active", "inactive"]).optional(),
   avatarUrl: z.string().optional(),
-  squads: z.array(z.string()).optional(),
 });
 
 export const employeeUpdateSchema = employeeCreateSchema.partial();

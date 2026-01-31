@@ -1,15 +1,12 @@
-import { useState, useDeferredValue, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { Link, useLoaderData } from "react-router-dom";
 import { Users, X, Building2 } from "lucide-react";
-import { useEmployeesQuery, useDeleteEmployeeMutation } from "../../../shared/lib/queries";
-import {
-  ReferenceData,
-  ViewMode,
-  SortField,
-  SortOrder,
-  StatusFilter,
-  Employee,
-} from "../__types__";
+import { useEmployeesQuery } from "@shared/lib/queries";
+import { useDeleteConfirmation } from "@shared/hooks/useDeleteConfirmation";
+import { useUrlFilters } from "@shared/hooks/useUrlFilters";
+import { useDebounce } from "@shared/hooks/useDebounce";
+import { ReferenceData, Employee } from "../utils/__types__";
+import { ViewMode } from "./utils/__types__";
 import Pagination from "./Pagination";
 import FilterModal from "./FilterModal";
 import EmployeeCard from "./EmployeeCard";
@@ -17,50 +14,24 @@ import EmployeeRow from "./EmployeeRow";
 import EmployeeSearchBar from "./EmployeeSearchBar";
 import EmployeeControls from "./EmployeeControls";
 import ActiveFilters from "./ActiveFilters";
-import DeleteConfirmationModal from "../../../shared/components/DeleteConfirmationModal";
+import DeleteConfirmationModal from "@shared/components/DeleteConfirmationModal";
 
 const ITEMS_PER_PAGE_OPTIONS = [6, 9, 12, 24];
 
-type Filters = {
-  search: string;
-  departments: string[];
-  squads: string[];
-  status: StatusFilter;
-  sort: SortField;
-  order: SortOrder;
-  page: number;
-  limit: number;
-};
-
-const initialFilters: Filters = {
-  search: "",
-  departments: [],
-  squads: [],
-  status: "all",
-  sort: "firstName",
-  order: "asc",
-  page: 1,
-  limit: 9,
-};
-
 const EmployeeListPage = () => {
-  const { departments, squads } = useLoaderData() as ReferenceData;
+  const { departments } = useLoaderData() as ReferenceData;
 
-  const [filters, setFilters] = useState<Filters>(initialFilters);
+  const { filters, setFilters, updateFilters, clearFilters } = useUrlFilters();
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
   const [groupByDepartment, setGroupByDepartment] = useState(false);
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
-  const [deleteTarget, setDeleteTarget] = useState<{
-    id: number;
-    name: string;
-  } | null>(null);
 
-  const deferredSearch = useDeferredValue(filters.search);
+  const debouncedSearch = useDebounce(filters.search, 300);
 
   const { data, isLoading, error } = useEmployeesQuery({
-    search: deferredSearch || undefined,
-    department: filters.departments.length > 0 ? filters.departments : undefined,
-    squad: filters.squads.length > 0 ? filters.squads : undefined,
+    search: debouncedSearch || undefined,
+    department:
+      filters.departments.length > 0 ? filters.departments : undefined,
     status: filters.status !== "all" ? filters.status : undefined,
     sort: filters.sort,
     order: filters.order,
@@ -68,15 +39,19 @@ const EmployeeListPage = () => {
     limit: filters.limit,
   });
 
-  const deleteMutation = useDeleteEmployeeMutation({
-    onSuccess: () => setDeleteTarget(null),
-  });
+  const {
+    deleteTarget,
+    isDeleting,
+    deleteError,
+    openDeleteConfirmation,
+    closeDeleteConfirmation,
+    confirmDelete,
+  } = useDeleteConfirmation();
 
   const employees = data?.data ?? [];
   const totalCount = data?.total ?? 0;
   const totalPages = Math.ceil(totalCount / filters.limit);
 
-  // Group employees by department
   const groupedEmployees = useMemo(() => {
     if (!groupByDepartment) return null;
     return employees.reduce(
@@ -89,53 +64,60 @@ const EmployeeListPage = () => {
     );
   }, [employees, groupByDepartment]);
 
-  const updateFilters = (updates: Partial<Filters>) =>
-    setFilters((prev) => ({ ...prev, ...updates, page: 1 }));
-
-  const clearFilters = () =>
-    setFilters((prev) => ({
-      ...initialFilters,
-      sort: prev.sort,
-      order: prev.order,
-      limit: prev.limit,
-    }));
-
-  const activeFilterChips = [
-    ...filters.departments.map((dept) => ({
-      type: "Department",
-      value: dept,
-      onRemove: () =>
-        updateFilters({
-          departments: filters.departments.filter((d) => d !== dept),
-        }),
-    })),
-    ...filters.squads.map((squad) => ({
-      type: "Squad",
-      value: squad,
-      onRemove: () =>
-        updateFilters({ squads: filters.squads.filter((s) => s !== squad) }),
-    })),
-    ...(filters.status !== "all"
-      ? [
-          {
-            type: "Status",
-            value: filters.status.charAt(0).toUpperCase() + filters.status.slice(1),
-            onRemove: () => updateFilters({ status: "all" }),
-          },
-        ]
-      : []),
-  ];
+  const activeFilterChips = useMemo(
+    () => [
+      ...filters.departments.map((dept) => ({
+        type: "Department",
+        value: dept,
+        onRemove: () =>
+          setFilters((prev) => ({
+            ...prev,
+            departments: prev.departments.filter((d) => d !== dept),
+            page: 1,
+          })),
+      })),
+      ...(filters.status !== "all"
+        ? [
+            {
+              type: "Status",
+              value:
+                filters.status.charAt(0).toUpperCase() +
+                filters.status.slice(1),
+              onRemove: () => updateFilters({ status: "all" }),
+            },
+          ]
+        : []),
+    ],
+    [filters.departments, filters.status, setFilters, updateFilters],
+  );
 
   const activeFilterCount =
-    filters.departments.length +
-    filters.squads.length +
-    (filters.status !== "all" ? 1 : 0);
+    filters.departments.length + (filters.status !== "all" ? 1 : 0);
 
-  const handleDelete = (emp: Employee) =>
-    setDeleteTarget({
-      id: emp.id,
-      name: `${emp.firstName} ${emp.lastName}`,
-    });
+  const handleDelete = useCallback(
+    ({ id, firstName, lastName }: Employee) => {
+      openDeleteConfirmation(id, `${firstName} ${lastName}`);
+    },
+    [openDeleteConfirmation],
+  );
+
+  const handlePageChange = useCallback(
+    (page: number) => {
+      setFilters((prev) => ({ ...prev, page }));
+    },
+    [setFilters],
+  );
+
+  const handleLimitChange = useCallback(
+    (e: React.ChangeEvent<HTMLSelectElement>) => {
+      setFilters((prev) => ({
+        ...prev,
+        limit: Number(e.target.value),
+        page: 1,
+      }));
+    },
+    [setFilters],
+  );
 
   if (isLoading && !data) {
     return (
@@ -180,7 +162,11 @@ const EmployeeListPage = () => {
     ) : (
       <div className="space-y-2">
         {employeeList.map((emp) => (
-          <EmployeeRow key={emp.id} employee={emp} onDelete={() => handleDelete(emp)} />
+          <EmployeeRow
+            key={emp.id}
+            employee={emp}
+            onDelete={() => handleDelete(emp)}
+          />
         ))}
       </div>
     );
@@ -219,13 +205,7 @@ const EmployeeListPage = () => {
           <span className="hidden sm:inline">Show:</span>
           <select
             value={filters.limit}
-            onChange={(e) =>
-              setFilters((prev) => ({
-                ...prev,
-                limit: Number(e.target.value),
-                page: 1,
-              }))
-            }
+            onChange={handleLimitChange}
             className="bg-transparent border-none p-0 text-muted focus:ring-0 cursor-pointer hover:text-primary"
           >
             {ITEMS_PER_PAGE_OPTIONS.map((n) => (
@@ -263,7 +243,9 @@ const EmployeeListPage = () => {
                   <div key={dept}>
                     <div className="flex items-center gap-2 mb-3 pb-2 border-b border-border">
                       <Building2 className="w-4 h-4 text-muted" />
-                      <h2 className="text-sm font-semibold text-primary">{dept}</h2>
+                      <h2 className="text-sm font-semibold text-primary">
+                        {dept}
+                      </h2>
                       <span className="text-xs text-muted">
                         ({deptEmployees.length})
                       </span>
@@ -279,7 +261,7 @@ const EmployeeListPage = () => {
           <Pagination
             currentPage={filters.page}
             totalPages={totalPages}
-            onPageChange={(page) => setFilters((prev) => ({ ...prev, page }))}
+            onPageChange={handlePageChange}
           />
         </div>
       )}
@@ -288,24 +270,22 @@ const EmployeeListPage = () => {
         isOpen={isFilterModalOpen}
         onClose={() => setIsFilterModalOpen(false)}
         departments={departments}
-        squads={squads}
         selectedDepartments={filters.departments}
-        selectedSquads={filters.squads}
         sortField={filters.sort}
         sortOrder={filters.order}
         statusFilter={filters.status}
-        onApply={(departments, squads, sort, order, status) =>
-          updateFilters({ departments, squads, sort, order, status })
+        onApply={(departments, sort, order, status) =>
+          updateFilters({ departments, sort, order, status })
         }
       />
 
       <DeleteConfirmationModal
         isOpen={!!deleteTarget}
-        onClose={() => !deleteMutation.isPending && setDeleteTarget(null)}
-        onConfirm={() => deleteTarget && deleteMutation.mutate(deleteTarget.id)}
-        isDeleting={deleteMutation.isPending}
+        onClose={closeDeleteConfirmation}
+        onConfirm={confirmDelete}
+        isDeleting={isDeleting}
         itemName={deleteTarget?.name ?? ""}
-        error={deleteMutation.error?.message ?? null}
+        error={deleteError}
       />
     </div>
   );

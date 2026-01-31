@@ -9,7 +9,6 @@ import {
   getAllEmployees,
   getEmployeeById,
   getDepartments,
-  getSquads,
   createEmployee,
   updateEmployee,
   deleteEmployee,
@@ -24,13 +23,17 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const UPLOADS_DIR = path.resolve(__dirname, "uploads");
 const PORT = process.env.PORT || 3001;
 
-// File upload configuration
+const FILE_UPLOAD = Object.freeze({
+  MAX_SIZE: 5 * 1024 * 1024,
+  ALLOWED_TYPES: ["image/jpeg", "image/png", "image/gif", "image/webp"],
+});
+
 const storage = multer.diskStorage({
-  destination: async (req, file, cb) => {
+  destination: async (_req, _file, cb) => {
     await mkdir(UPLOADS_DIR, { recursive: true });
     cb(null, UPLOADS_DIR);
   },
-  filename: (req, file, cb) => {
+  filename: (_req, file, cb) => {
     const ext = path.extname(file.originalname);
     cb(null, `${crypto.randomUUID()}${ext}`);
   },
@@ -38,15 +41,10 @@ const storage = multer.diskStorage({
 
 const upload = multer({
   storage,
-  limits: { fileSize: 5 * 1024 * 1024 },
-  fileFilter: (req, file, cb) => {
-    const allowedTypes = ["image/jpeg", "image/png", "image/gif", "image/webp"];
-    cb(
-      allowedTypes.includes(file.mimetype)
-        ? null
-        : new Error("Invalid file type"),
-      allowedTypes.includes(file.mimetype),
-    );
+  limits: { fileSize: FILE_UPLOAD.MAX_SIZE },
+  fileFilter: (_req, file, cb) => {
+    const isValid = FILE_UPLOAD.ALLOWED_TYPES.includes(file.mimetype);
+    cb(isValid ? null : new Error("Invalid file type"), isValid);
   },
 });
 
@@ -55,7 +53,6 @@ app.use(cors());
 app.use(express.json());
 app.use("/uploads", express.static(UPLOADS_DIR));
 
-// Employee routes
 app.get("/employees", async (req, res) => {
   res.json(await getAllEmployees(req.query));
 });
@@ -81,16 +78,10 @@ app.delete("/employees/:id", async (req, res) => {
   res.json(await deleteEmployee(req.params.id));
 });
 
-// Reference data routes
-app.get("/departments", async (req, res) => {
+app.get("/departments", async (_req, res) => {
   res.json(await getDepartments());
 });
 
-app.get("/squads", async (req, res) => {
-  res.json(await getSquads());
-});
-
-// File upload route
 app.post("/upload", upload.single("avatar"), (req, res) => {
   if (!req.file) {
     const error = new Error("No file uploaded");
@@ -100,13 +91,11 @@ app.post("/upload", upload.single("avatar"), (req, res) => {
   res.json({ url: `http://localhost:${PORT}/uploads/${req.file.filename}` });
 });
 
-// Health check
-app.get("/health", (req, res) => res.json({ status: "ok" }));
+app.get("/health", (_req, res) => res.json({ status: "ok" }));
 
-// Error handlers
-app.use((req, res) => res.status(404).json({ error: "Not found" }));
+app.use((_req, res) => res.status(404).json({ error: "Not found" }));
 
-app.use((err, req, res, next) => {
+app.use((err, req, res, _next) => {
   const status = err.status || 500;
   console.error(`${req.method} ${req.path} - ${status}: ${err.message}`);
   res.status(status).json({ error: err.message });

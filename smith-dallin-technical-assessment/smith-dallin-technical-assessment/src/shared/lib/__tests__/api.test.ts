@@ -3,7 +3,6 @@ import {
   getEmployees,
   getEmployee,
   getDepartments,
-  getSquads,
   createEmployee,
   updateEmployee,
   deleteEmployee,
@@ -21,7 +20,6 @@ const mockEmployee = {
   quote: "Hello",
   status: "active" as const,
   avatarUrl: "",
-  squads: ["Alpha"],
 };
 
 describe("API functions", () => {
@@ -38,7 +36,12 @@ describe("API functions", () => {
 
   describe("getEmployees", () => {
     it("fetches employees without filters", async () => {
-      const mockResponse = { data: [mockEmployee], total: 1, page: 1, limit: 9 };
+      const mockResponse = {
+        data: [mockEmployee],
+        total: 1,
+        page: 1,
+        limit: 9,
+      };
       vi.mocked(global.fetch).mockResolvedValueOnce({
         ok: true,
         json: () => Promise.resolve(mockResponse),
@@ -48,7 +51,7 @@ describe("API functions", () => {
 
       expect(global.fetch).toHaveBeenCalledWith(
         "http://localhost:3001/employees",
-        undefined,
+        { signal: undefined },
       );
       expect(result).toEqual(mockResponse);
     });
@@ -62,7 +65,6 @@ describe("API functions", () => {
       await getEmployees({
         search: "john",
         department: ["Engineering", "Product"],
-        squad: ["Alpha"],
         status: "active",
         sort: "firstName",
         order: "asc",
@@ -73,7 +75,6 @@ describe("API functions", () => {
       const calledUrl = vi.mocked(global.fetch).mock.calls[0][0] as string;
       expect(calledUrl).toContain("search=john");
       expect(calledUrl).toContain("department=Engineering%2CProduct");
-      expect(calledUrl).toContain("squad=Alpha");
       expect(calledUrl).toContain("status=active");
       expect(calledUrl).toContain("sort=firstName");
       expect(calledUrl).toContain("order=asc");
@@ -110,7 +111,7 @@ describe("API functions", () => {
         json: () => Promise.reject(new Error("Parse error")),
       } as Response);
 
-      await expect(getEmployees()).rejects.toThrow("Request failed: 500");
+      await expect(getEmployees()).rejects.toThrow("Server error");
     });
   });
 
@@ -125,7 +126,7 @@ describe("API functions", () => {
 
       expect(global.fetch).toHaveBeenCalledWith(
         "http://localhost:3001/employees/1",
-        undefined,
+        { signal: undefined },
       );
       expect(result).toEqual(mockEmployee);
     });
@@ -153,27 +154,9 @@ describe("API functions", () => {
 
       expect(global.fetch).toHaveBeenCalledWith(
         "http://localhost:3001/departments",
-        undefined,
+        { signal: undefined },
       );
       expect(result).toEqual(departments);
-    });
-  });
-
-  describe("getSquads", () => {
-    it("fetches squads list", async () => {
-      const squads = ["Alpha", "Beta", "Gamma"];
-      vi.mocked(global.fetch).mockResolvedValueOnce({
-        ok: true,
-        json: () => Promise.resolve(squads),
-      } as Response);
-
-      const result = await getSquads();
-
-      expect(global.fetch).toHaveBeenCalledWith(
-        "http://localhost:3001/squads",
-        undefined,
-      );
-      expect(result).toEqual(squads);
     });
   });
 

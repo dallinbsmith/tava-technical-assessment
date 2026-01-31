@@ -1,27 +1,13 @@
 import { useState, useEffect } from "react";
 import { Filter } from "lucide-react";
-import { cn } from "../../../shared/lib/styles";
-import { Modal } from "../../../shared/components/Modal";
-import { SortField, SortOrder, StatusFilter } from "../__types__";
-
-type Props = {
-  isOpen: boolean;
-  onClose: () => void;
-  departments: string[];
-  squads: string[];
-  selectedDepartments: string[];
-  selectedSquads: string[];
-  sortField: SortField;
-  sortOrder: SortOrder;
-  statusFilter: StatusFilter;
-  onApply: (
-    departments: string[],
-    squads: string[],
-    sortField: SortField,
-    sortOrder: SortOrder,
-    statusFilter: StatusFilter,
-  ) => void;
-};
+import { cn } from "@shared/lib/styles";
+import { Modal } from "@shared/components/Modal";
+import {
+  FilterModalProps,
+  SortField,
+  SortOrder,
+  StatusFilter,
+} from "./utils/__types__";
 
 const sortOptions: { value: SortField; label: string }[] = [
   { value: "firstName", label: "First Name" },
@@ -38,17 +24,14 @@ const FilterModal = ({
   isOpen,
   onClose,
   departments,
-  squads,
   selectedDepartments,
-  selectedSquads,
   sortField,
   sortOrder,
   statusFilter,
   onApply,
-}: Props) => {
+}: FilterModalProps) => {
   const [localDepartments, setLocalDepartments] =
     useState<string[]>(selectedDepartments);
-  const [localSquads, setLocalSquads] = useState<string[]>(selectedSquads);
   const [localSortField, setLocalSortField] = useState<SortField>(sortField);
   const [localSortOrder, setLocalSortOrder] = useState<SortOrder>(sortOrder);
   const [localStatusFilter, setLocalStatusFilter] =
@@ -57,19 +40,11 @@ const FilterModal = ({
   useEffect(() => {
     if (isOpen) {
       setLocalDepartments(selectedDepartments);
-      setLocalSquads(selectedSquads);
       setLocalSortField(sortField);
       setLocalSortOrder(sortOrder);
       setLocalStatusFilter(statusFilter);
     }
-  }, [
-    isOpen,
-    selectedDepartments,
-    selectedSquads,
-    sortField,
-    sortOrder,
-    statusFilter,
-  ]);
+  }, [isOpen, selectedDepartments, sortField, sortOrder, statusFilter]);
 
   const toggleItem = (
     item: string,
@@ -84,7 +59,6 @@ const FilterModal = ({
   const handleApply = () => {
     onApply(
       localDepartments,
-      localSquads,
       localSortField,
       localSortOrder,
       localStatusFilter,
@@ -93,16 +67,13 @@ const FilterModal = ({
   };
 
   const hasSelections =
-    localDepartments.length > 0 ||
-    localSquads.length > 0 ||
-    localStatusFilter !== "all";
+    localDepartments.length > 0 || localStatusFilter !== "all";
 
   const footer = (
     <>
       <button
         onClick={() => {
           setLocalDepartments([]);
-          setLocalSquads([]);
           setLocalSortField("firstName");
           setLocalSortOrder("asc");
           setLocalStatusFilter("all");
@@ -216,28 +187,6 @@ const FilterModal = ({
                   className="w-4 h-4 accent-sky-500"
                 />
                 <span className="text-sm text-primary">{dept}</span>
-              </label>
-            ))}
-          </div>
-        </div>
-
-        <div>
-          <h3 className="text-sm font-medium text-muted mb-3">Squads</h3>
-          <div className="space-y-2">
-            {squads.map((squad) => (
-              <label
-                key={squad}
-                className="flex items-center gap-3 cursor-pointer"
-              >
-                <input
-                  type="checkbox"
-                  checked={localSquads.includes(squad)}
-                  onChange={() =>
-                    toggleItem(squad, localSquads, setLocalSquads)
-                  }
-                  className="w-4 h-4 accent-sky-500"
-                />
-                <span className="text-sm text-primary">{squad}</span>
               </label>
             ))}
           </div>

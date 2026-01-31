@@ -1,6 +1,13 @@
 import { useLoaderData, useParams } from "react-router-dom";
-import { useCreateEmployeeMutation, useUpdateEmployeeMutation } from "../../../shared/lib/queries";
-import { EmployeeFormData, EditLoaderData, ReferenceData } from "../__types__";
+import {
+  useCreateEmployeeMutation,
+  useUpdateEmployeeMutation,
+} from "@shared/lib/queries";
+import {
+  EmployeeFormData,
+  EditLoaderData,
+  ReferenceData,
+} from "../utils/__types__";
 import EmployeeForm from "./EmployeeForm";
 
 const EmployeeFormPage = () => {
@@ -8,6 +15,7 @@ const EmployeeFormPage = () => {
   const loaderData = useLoaderData() as EditLoaderData | ReferenceData;
   const isEditMode = "employee" in loaderData;
 
+  const { departments } = loaderData;
   const employee = isEditMode ? loaderData.employee : undefined;
   const employeeId = id ? parseInt(id) : 0;
 
@@ -28,8 +36,7 @@ const EmployeeFormPage = () => {
       onSubmit={handleSubmit}
       submitLabel={isEditMode ? "Save Changes" : "Create Employee"}
       title={isEditMode ? "Edit Employee" : "Add New Employee"}
-      departments={loaderData.departments}
-      squads={loaderData.squads}
+      departments={departments}
     />
   );
 };

@@ -46,7 +46,7 @@
       "dateStarted": "1996-08-15T00:00:00.000Z",
       "quote": "Ummm, I'm gonna need you to go ahead come in tomorrow.",
       "status": "active",
-      "avatarUrl": "https://i.pravatar.cc/150?u=bill.lumbergh"
+      "avatarUrl": "http://localhost:3001/uploads/a94fb129-da07-447e-b171-15abd1b77cbf.png"
     },
     {
       "id": 5,
@@ -166,7 +166,7 @@
       "dateStarted": "1997-11-03T00:00:00.000Z",
       "quote": "We need to talk about your TPS reports.",
       "status": "active",
-      "avatarUrl": "https://i.pravatar.cc/150?u=anne.davidson"
+      "avatarUrl": "http://localhost:3001/uploads/92440138-2f9f-4874-b261-6b7a467992a0.png"
     },
     {
       "id": 15,
@@ -240,47 +240,6 @@
       "status": "active",
       "avatarUrl": "https://i.pravatar.cc/150?u=david.herman"
     }
-  ],
-  "squads": [
-    { "id": 1, "name": "TPS Reports" },
-    { "id": 2, "name": "Y2K Bug Fix" },
-    { "id": 3, "name": "Printer Repair" },
-    { "id": 4, "name": "Infrastructure" },
-    { "id": 5, "name": "Customer Success" },
-    { "id": 6, "name": "Platform" },
-    { "id": 7, "name": "Security" },
-    { "id": 8, "name": "Data Analytics" }
-  ],
-  "employeeSquads": [
-    { "employeeId": 1, "squadId": 1 },
-    { "employeeId": 1, "squadId": 2 },
-    { "employeeId": 2, "squadId": 1 },
-    { "employeeId": 2, "squadId": 2 },
-    { "employeeId": 3, "squadId": 2 },
-    { "employeeId": 3, "squadId": 3 },
-    { "employeeId": 4, "squadId": 1 },
-    { "employeeId": 5, "squadId": 1 },
-    { "employeeId": 6, "squadId": 1 },
-    { "employeeId": 7, "squadId": 3 },
-    { "employeeId": 7, "squadId": 4 },
-    { "employeeId": 8, "squadId": 4 },
-    { "employeeId": 9, "squadId": 5 },
-    { "employeeId": 10, "squadId": 4 },
-    { "employeeId": 10, "squadId": 6 },
-    { "employeeId": 11, "squadId": 5 },
-    { "employeeId": 12, "squadId": 1 },
-    { "employeeId": 13, "squadId": 2 },
-    { "employeeId": 13, "squadId": 6 },
-    { "employeeId": 14, "squadId": 1 },
-    { "employeeId": 14, "squadId": 6 },
-    { "employeeId": 15, "squadId": 4 },
-    { "employeeId": 16, "squadId": 5 },
-    { "employeeId": 17, "squadId": 2 },
-    { "employeeId": 17, "squadId": 7 },
-    { "employeeId": 18, "squadId": 1 },
-    { "employeeId": 19, "squadId": 8 },
-    { "employeeId": 20, "squadId": 4 },
-    { "employeeId": 20, "squadId": 7 }
   ],
   "departments": [
     "Engineering",

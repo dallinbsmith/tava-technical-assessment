@@ -1,91 +1,15 @@
-import {
-  useState,
-  FormEvent,
-  ReactNode,
-  InputHTMLAttributes,
-  TextareaHTMLAttributes,
-} from "react";
+import { useState, FormEvent } from "react";
 import { Link } from "react-router-dom";
-import { ArrowLeft, AlertCircle, Pencil } from "lucide-react";
-import { Employee, EmployeeFormData, employeeFormSchema } from "../__types__";
-import { cn } from "../../../shared/lib/styles";
-import AssignmentModal from "./AssignmentModal";
-
-// Form field components
-const Row = ({
-  children,
-  className,
-}: {
-  children: ReactNode;
-  className?: string;
-}) => (
-  <div className={cn("grid grid-cols-1 sm:grid-cols-2 gap-4", className)}>
-    {children}
-  </div>
-);
-
-const Field = ({
-  label,
-  required,
-  error,
-  children,
-  htmlFor,
-  action,
-}: {
-  label: string;
-  required?: boolean;
-  error?: string;
-  children: ReactNode;
-  htmlFor?: string;
-  action?: ReactNode;
-}) => (
-  <div>
-    <div
-      className={cn(
-        "flex items-center mb-1.5",
-        action ? "justify-between" : "",
-      )}
-    >
-      <label htmlFor={htmlFor} className="block text-sm font-medium text-muted">
-        {label} {required && <span className="text-red-400">*</span>}
-      </label>
-      {action}
-    </div>
-    {children}
-    {error && <p className="text-xs text-red-400 mt-1">{error}</p>}
-  </div>
-);
-
-const Input = ({
-  error,
-  className,
-  ...props
-}: InputHTMLAttributes<HTMLInputElement> & { error?: boolean }) => (
-  <input
-    className={cn("input-field", error && "error", className)}
-    {...props}
-  />
-);
-
-const TextArea = ({
-  error,
-  className,
-  ...props
-}: TextareaHTMLAttributes<HTMLTextAreaElement> & { error?: boolean }) => (
-  <textarea
-    className={cn("input-field resize-none", error && "error", className)}
-    {...props}
-  />
-);
-
-type Props = {
-  initialData?: Partial<Employee>;
-  onSubmit: (data: EmployeeFormData) => Promise<void>;
-  submitLabel: string;
-  title: string;
-  departments: string[];
-  squads: string[];
-};
+import { ArrowLeft, AlertCircle } from "lucide-react";
+import { EmployeeFormProps } from "./utils/__types__";
+import { employeeFormSchema, EmployeeFormData } from "../utils/__types__";
+import { cn } from "@shared/lib/styles";
+import {
+  FormRow,
+  FormField,
+  FormInput,
+  FormTextArea,
+} from "@shared/components/FormFields";
 
 const EmployeeForm = ({
   initialData: {
@@ -98,16 +22,13 @@ const EmployeeForm = ({
     quote = "",
     status = "active",
     avatarUrl = "",
-    squads: initialSquads = [],
   } = {},
   onSubmit,
   submitLabel,
   title,
   departments,
-  squads,
-}: Props) => {
-  const [isAssignmentModalOpen, setIsAssignmentModalOpen] = useState(false);
-  const [formData, setFormData] = useState<EmployeeFormData>({
+}: EmployeeFormProps) => {
+  const [formData, setFormData] = useState({
     firstName,
     lastName,
     email,
@@ -117,7 +38,6 @@ const EmployeeForm = ({
     quote,
     status,
     avatarUrl,
-    squads: initialSquads,
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
@@ -155,22 +75,20 @@ const EmployeeForm = ({
     }
   };
 
-  const set =
+  const handleFieldChange =
     (field: keyof EmployeeFormData) =>
-    (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    (
+      e: React.ChangeEvent<
+        HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+      >,
+    ) => {
       setFormData((prev) => ({ ...prev, [field]: e.target.value }));
-      if (errors[field]) setErrors((prev) => ({ ...prev, [field]: "" }));
+      setErrors((prev) => (prev[field] ? { ...prev, [field]: "" } : prev));
     };
 
-  const editBtn = (
-    <button
-      type="button"
-      onClick={() => setIsAssignmentModalOpen(true)}
-      className="p-1 text-muted hover:text-sky-400 transition-colors"
-    >
-      <Pencil className="w-4 h-4" />
-    </button>
-  );
+  const handleStatusChange = (newStatus: "active" | "inactive") => {
+    setFormData((prev) => ({ ...prev, status: newStatus }));
+  };
 
   return (
     <div className="max-w-2xl mx-auto">
@@ -192,80 +110,78 @@ const EmployeeForm = ({
       )}
 
       <form onSubmit={handleSubmit} className="card p-6 space-y-6">
-        <Row>
-          <Field
+        <FormRow>
+          <FormField
             label="First Name"
             required
             htmlFor="firstName"
             error={errors.firstName}
           >
-            <Input
+            <FormInput
               id="firstName"
               value={formData.firstName}
-              onChange={set("firstName")}
+              onChange={handleFieldChange("firstName")}
               error={!!errors.firstName}
             />
-          </Field>
-          <Field
+          </FormField>
+          <FormField
             label="Last Name"
             required
             htmlFor="lastName"
             error={errors.lastName}
           >
-            <Input
+            <FormInput
               id="lastName"
               value={formData.lastName}
-              onChange={set("lastName")}
+              onChange={handleFieldChange("lastName")}
               error={!!errors.lastName}
             />
-          </Field>
-        </Row>
+          </FormField>
+        </FormRow>
 
-        <Row>
-          <Field label="Email" htmlFor="email" error={errors.email}>
-            <Input
+        <FormRow>
+          <FormField label="Email" htmlFor="email" error={errors.email}>
+            <FormInput
               id="email"
               type="email"
               value={formData.email}
-              onChange={set("email")}
+              onChange={handleFieldChange("email")}
               error={!!errors.email}
               placeholder="email@example.com"
             />
-          </Field>
-          <Field label="Job Title" htmlFor="jobTitle">
-            <Input
+          </FormField>
+          <FormField label="Job Title" htmlFor="jobTitle">
+            <FormInput
               id="jobTitle"
               value={formData.title}
-              onChange={set("title")}
+              onChange={handleFieldChange("title")}
               placeholder="e.g. Software Engineer"
             />
-          </Field>
-        </Row>
+          </FormField>
+        </FormRow>
 
-        <Row>
-          <Field
+        <FormRow>
+          <FormField
             label="Start Date"
             required
             htmlFor="dateStarted"
             error={errors.dateStarted}
           >
-            <Input
+            <FormInput
               id="dateStarted"
               type="date"
               value={formData.dateStarted}
-              onChange={set("dateStarted")}
+              onChange={handleFieldChange("dateStarted")}
               error={!!errors.dateStarted}
             />
-          </Field>
-          <Field label="Status">
+          </FormField>
+          <FormField label="Status">
             <div className="flex gap-2">
               {(["active", "inactive"] as const).map((s) => (
                 <button
                   key={s}
                   type="button"
-                  onClick={() =>
-                    setFormData((prev) => ({ ...prev, status: s }))
-                  }
+                  onClick={() => handleStatusChange(s)}
                   className={cn(
                     "px-3 py-1.5 text-sm font-medium transition-colors capitalize",
                     formData.status === s
@@ -279,48 +195,39 @@ const EmployeeForm = ({
                 </button>
               ))}
             </div>
-          </Field>
-        </Row>
+          </FormField>
+        </FormRow>
 
-        <Row>
-          <Field
-            label="Department"
-            required
-            error={errors.department}
-            action={editBtn}
+        <FormField
+          label="Department"
+          required
+          htmlFor="department"
+          error={errors.department}
+        >
+          <select
+            id="department"
+            value={formData.department}
+            onChange={handleFieldChange("department")}
+            className={cn("input-field", errors.department && "error")}
           >
-            <span
-              className={
-                formData.department ? "text-primary" : "text-sm text-subtle"
-              }
-            >
-              {formData.department || "No department"}
-            </span>
-          </Field>
-          <Field label="Squads" action={editBtn}>
-            <div className="flex items-center gap-1 flex-wrap">
-              {formData.squads.length > 0 ? (
-                formData.squads.map((sq) => (
-                  <span key={sq} className="badge">
-                    {sq}
-                  </span>
-                ))
-              ) : (
-                <span className="text-sm text-subtle">No squads</span>
-              )}
-            </div>
-          </Field>
-        </Row>
+            <option value="">Select a department</option>
+            {departments.map((dept) => (
+              <option key={dept} value={dept}>
+                {dept}
+              </option>
+            ))}
+          </select>
+        </FormField>
 
-        <Field label="Quote" htmlFor="quote">
-          <TextArea
+        <FormField label="Quote" htmlFor="quote">
+          <FormTextArea
             id="quote"
             value={formData.quote}
-            onChange={set("quote")}
+            onChange={handleFieldChange("quote")}
             rows={3}
             placeholder="A memorable quote..."
           />
-        </Field>
+        </FormField>
 
         <div className="flex flex-col-reverse sm:flex-row gap-3 pt-4 border-t border-border">
           <Link
@@ -338,20 +245,6 @@ const EmployeeForm = ({
           </button>
         </div>
       </form>
-
-      <AssignmentModal
-        isOpen={isAssignmentModalOpen}
-        onClose={() => setIsAssignmentModalOpen(false)}
-        departments={departments}
-        squads={squads}
-        selectedDepartment={formData.department}
-        selectedSquads={formData.squads}
-        onSave={(dept, sqs) => {
-          setFormData((prev) => ({ ...prev, department: dept, squads: sqs }));
-          if (errors.department)
-            setErrors((prev) => ({ ...prev, department: "" }));
-        }}
-      />
     </div>
   );
 };

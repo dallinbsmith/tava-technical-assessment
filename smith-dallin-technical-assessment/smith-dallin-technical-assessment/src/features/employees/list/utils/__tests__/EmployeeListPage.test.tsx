@@ -1,9 +1,15 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, waitFor } from "../../../../test/test-utils";
+import {
+  render,
+  screen,
+  waitFor,
+  mockEmployees,
+  mockReferenceData,
+} from "@test/test-utils";
 import userEvent from "@testing-library/user-event";
-import EmployeeListPage from "../EmployeeListPage";
+import EmployeeListPage from "../../EmployeeListPage";
 import * as reactRouterDom from "react-router-dom";
-import * as queries from "../../../../shared/lib/queries";
+import * as queries from "@shared/lib/queries";
 
 vi.mock("react-router-dom", async () => {
   const actual = await vi.importActual("react-router-dom");
@@ -13,8 +19,8 @@ vi.mock("react-router-dom", async () => {
   };
 });
 
-vi.mock("../../../../shared/lib/queries", async () => {
-  const actual = await vi.importActual("../../../../shared/lib/queries");
+vi.mock("@shared/lib/queries", async () => {
+  const actual = await vi.importActual("@shared/lib/queries");
   return {
     ...actual,
     useEmployeesQuery: vi.fn(),
@@ -22,41 +28,9 @@ vi.mock("../../../../shared/lib/queries", async () => {
   };
 });
 
-const mockEmployees = [
-  {
-    id: 1,
-    firstName: "John",
-    lastName: "Doe",
-    email: "john@example.com",
-    title: "Software Engineer",
-    department: "Engineering",
-    dateStarted: "2024-01-15",
-    quote: "Hello world",
-    status: "active" as const,
-    avatarUrl: "",
-    squads: ["Alpha"],
-  },
-  {
-    id: 2,
-    firstName: "Jane",
-    lastName: "Smith",
-    email: "jane@example.com",
-    title: "Product Manager",
-    department: "Product",
-    dateStarted: "2023-06-01",
-    quote: "Ship it!",
-    status: "active" as const,
-    avatarUrl: "",
-    squads: ["Beta"],
-  },
-];
-
 describe("EmployeeListPage", () => {
   beforeEach(() => {
-    vi.mocked(reactRouterDom.useLoaderData).mockReturnValue({
-      departments: ["Engineering", "Product", "Design"],
-      squads: ["Alpha", "Beta", "Gamma"],
-    });
+    vi.mocked(reactRouterDom.useLoaderData).mockReturnValue(mockReferenceData);
 
     vi.mocked(queries.useEmployeesQuery).mockReturnValue({
       data: { data: mockEmployees, total: 2, page: 1, limit: 9 },

@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
-import Avatar from "../Avatar";
+import Avatar from "../../Avatar";
 
 describe("Avatar", () => {
   describe("initials fallback", () => {
@@ -65,9 +65,7 @@ describe("Avatar", () => {
     });
 
     it("applies md size classes (default)", () => {
-      const { container } = render(
-        <Avatar firstName="John" lastName="Doe" />,
-      );
+      const { container } = render(<Avatar firstName="John" lastName="Doe" />);
 
       expect(container.firstChild).toHaveClass("w-10", "h-10");
     });

@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { render, screen } from "@testing-library/react";
-import { mockEmployee as baseMockEmployee } from "../../../../test/test-utils";
-import EmployeeInfo from "../EmployeeInfo";
+import { mockEmployee as baseMockEmployee } from "@test/test-utils";
+import EmployeeInfo from "../../EmployeeInfo";
 
 const mockEmployee = { ...baseMockEmployee, avatarUrl: "" };
 
@@ -28,9 +28,7 @@ describe("EmployeeInfo", () => {
     });
 
     it("displays 'Not assigned' when no department", () => {
-      render(
-        <EmployeeInfo employee={{ ...mockEmployee, department: "" }} />,
-      );
+      render(<EmployeeInfo employee={{ ...mockEmployee, department: "" }} />);
 
       expect(screen.getByText("Not assigned")).toBeInTheDocument();
     });
@@ -53,9 +51,7 @@ describe("EmployeeInfo", () => {
     });
 
     it("displays 'Not specified' when no start date", () => {
-      render(
-        <EmployeeInfo employee={{ ...mockEmployee, dateStarted: "" }} />,
-      );
+      render(<EmployeeInfo employee={{ ...mockEmployee, dateStarted: "" }} />);
 
       expect(screen.getByText("Not specified")).toBeInTheDocument();
     });

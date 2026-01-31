@@ -32,13 +32,27 @@ export const mockEmployee = {
   quote: "Hello world!",
   status: "active" as const,
   avatarUrl: "https://example.com/avatar.jpg",
-  squads: ["Alpha", "Beta"],
 };
+
+export const mockEmployees = [
+  mockEmployee,
+  {
+    id: 2,
+    firstName: "Jane",
+    lastName: "Smith",
+    email: "jane@example.com",
+    title: "Product Manager",
+    department: "Product",
+    dateStarted: "2023-06-01T00:00:00.000Z",
+    quote: "Ship it!",
+    status: "active" as const,
+    avatarUrl: "",
+  },
+];
 
 // Reference data for tests
 export const mockReferenceData = {
-  departments: ["Engineering", "Design", "Marketing"],
-  squads: ["Alpha", "Beta", "Gamma"],
+  departments: ["Engineering", "Product", "Design"],
 };
 
 type WrapperProps = {

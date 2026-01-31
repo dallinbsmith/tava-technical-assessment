@@ -1,17 +1,11 @@
-import { useState, useRef } from "react";
+import { useState } from "react";
+import { useDropzone, FileRejection } from "react-dropzone";
 import { useMutation } from "@tanstack/react-query";
 import { Camera, Upload, X, Loader2, Check } from "lucide-react";
-import { cn } from "../../../shared/lib/styles";
-import { uploadAvatar } from "../../../shared/lib/api";
+import { cn } from "@shared/lib/styles";
+import { uploadAvatar } from "@shared/lib/api";
 import Avatar from "../list/Avatar";
-
-type Props = {
-  currentAvatarUrl?: string;
-  firstName: string;
-  lastName: string;
-  onUpload: (imageUrl: string) => Promise<unknown>;
-  inactive?: boolean;
-};
+import { AvatarUploadProps } from "./utils/__types__";
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
 const SUCCESS_TIMEOUT = 2000;
@@ -22,12 +16,10 @@ const AvatarUpload = ({
   lastName,
   onUpload,
   inactive = false,
-}: Props) => {
+}: AvatarUploadProps) => {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
-  const [isDragging, setIsDragging] = useState(false);
   const [validationError, setValidationError] = useState<string | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const uploadMutation = useMutation({
     mutationFn: async (file: File) => {
@@ -44,19 +36,14 @@ const AvatarUpload = ({
     },
   });
 
-  const handleFileSelect = (file: File) => {
+  const handleFileDrop = (acceptedFiles: File[]) => {
+    const file = acceptedFiles[0];
+    if (!file) return;
+
     setValidationError(null);
     uploadMutation.reset();
 
-    if (!file.type.startsWith("image/")) {
-      setValidationError("Please select an image file");
-      return;
-    }
-    if (file.size > MAX_FILE_SIZE) {
-      setValidationError("Image must be less than 5MB");
-      return;
-    }
-
+    // Generate preview
     const reader = new FileReader();
     reader.onload = (e) => setPreviewUrl(e.target?.result as string);
     reader.readAsDataURL(file);
@@ -64,35 +51,34 @@ const AvatarUpload = ({
     uploadMutation.mutate(file);
   };
 
-  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    setIsDragging(false);
-    const file = e.dataTransfer.files[0];
-    if (file) handleFileSelect(file);
+  const handleFileRejection = (rejections: FileRejection[]) => {
+    const rejection = rejections[0];
+    if (!rejection) return;
+
+    const error = rejection.errors[0];
+    if (error?.code === "file-too-large") {
+      setValidationError("Image must be less than 5MB");
+    } else if (error?.code === "file-invalid-type") {
+      setValidationError("Please select an image file");
+    } else {
+      setValidationError(error?.message || "Invalid file");
+    }
   };
 
-  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    setIsDragging(true);
-  };
-
-  const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    setIsDragging(false);
-  };
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) handleFileSelect(file);
-  };
-
-  const handleClick = () =>
-    !uploadMutation.isPending && fileInputRef.current?.click();
+  const { getRootProps, getInputProps, isDragActive, open } = useDropzone({
+    accept: { "image/*": [] },
+    maxSize: MAX_FILE_SIZE,
+    multiple: false,
+    disabled: uploadMutation.isPending,
+    onDrop: handleFileDrop,
+    onDropRejected: handleFileRejection,
+    noClick: false,
+    noKeyboard: false,
+  });
 
   const clearError = () => {
     setValidationError(null);
     uploadMutation.reset();
-    if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
   const displayUrl = previewUrl || currentAvatarUrl;
@@ -102,18 +88,18 @@ const AvatarUpload = ({
   return (
     <div className="relative group overflow-visible">
       <div
-        className={cn(
-          "relative overflow-hidden border-4 shadow-lg transition-all duration-200 cursor-pointer",
-          isDragging
-            ? "border-sky-400 scale-105"
-            : "border-surface hover:border-sky-500/50",
-          isUploading && "opacity-75",
-        )}
-        onDrop={handleDrop}
-        onDragOver={handleDragOver}
-        onDragLeave={handleDragLeave}
-        onClick={handleClick}
+        {...getRootProps({
+          className: cn(
+            "relative overflow-hidden border-4 shadow-lg transition-all duration-200 cursor-pointer",
+            isDragActive
+              ? "border-sky-400 scale-105"
+              : "border-surface hover:border-sky-500/50",
+            isUploading && "opacity-75",
+          ),
+        })}
       >
+        <input {...getInputProps()} />
+
         <Avatar
           src={displayUrl}
           firstName={firstName}
@@ -141,19 +127,10 @@ const AvatarUpload = ({
         )}
       </div>
 
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept="image/*"
-        onChange={handleInputChange}
-        className="hidden"
-        disabled={isUploading}
-      />
-
       {!isUploading && (
         <button
           type="button"
-          onClick={handleClick}
+          onClick={open}
           className="absolute -bottom-1 -right-1 w-8 h-8 bg-surface shadow-md flex items-center justify-center border border-border hover:bg-elevated transition-colors cursor-pointer"
           title="Upload image"
         >
@@ -170,7 +147,7 @@ const AvatarUpload = ({
         </div>
       )}
 
-      {isDragging && (
+      {isDragActive && (
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
           <div className="w-28 h-28 border-2 border-dashed border-sky-400 animate-pulse" />
         </div>
