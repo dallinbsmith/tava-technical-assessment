@@ -1,16 +1,10 @@
-import { Employee } from "../../../utils/__types__";
+import { Employee } from "./index";
 
 export type ViewMode = "grid" | "list";
 export type SortField = "firstName" | "lastName";
 export type StatusFilter = "all" | "active" | "inactive";
 export type SortOrder = "asc" | "desc";
 export type AvatarSize = "sm" | "md" | "lg" | "xl";
-
-export type FilterChip = {
-  type: string;
-  value: string;
-  onRemove: () => void;
-};
 
 export type ListFilters = {
   search: string;
@@ -42,11 +36,6 @@ export type PaginationProps = {
   currentPage: number;
   totalPages: number;
   onPageChange: (page: number) => void;
-};
-
-export type ActiveFiltersProps = {
-  filters: FilterChip[];
-  onClearAll: () => void;
 };
 
 export type EmployeeCardProps = {

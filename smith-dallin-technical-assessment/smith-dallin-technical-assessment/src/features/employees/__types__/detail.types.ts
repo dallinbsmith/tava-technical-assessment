@@ -1,4 +1,4 @@
-import { Employee } from "../../../utils/__types__";
+import { Employee } from "./index";
 
 export type AvatarUploadProps = {
   currentAvatarUrl?: string;

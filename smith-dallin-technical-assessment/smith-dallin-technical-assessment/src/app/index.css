@@ -27,7 +27,6 @@
     @apply bg-base text-primary antialiased;
   }
 
-  /* Custom scrollbar */
   ::-webkit-scrollbar {
     width: 8px;
     height: 8px;

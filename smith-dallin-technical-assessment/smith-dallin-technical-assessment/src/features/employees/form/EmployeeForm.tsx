@@ -1,8 +1,11 @@
 import { useState, FormEvent } from "react";
 import { Link } from "react-router-dom";
 import { ArrowLeft, AlertCircle } from "lucide-react";
-import { EmployeeFormProps } from "./utils/__types__";
-import { employeeFormSchema, EmployeeFormData } from "../utils/__types__";
+import {
+  EmployeeFormProps,
+  employeeFormSchema,
+  EmployeeFormData,
+} from "../__types__";
 import { cn } from "@shared/lib/styles";
 import {
   FormRow,
@@ -10,6 +13,9 @@ import {
   FormInput,
   FormTextArea,
 } from "@shared/components/FormFields";
+
+const toInputDate = (dateString?: string) =>
+  dateString?.includes("T") ? dateString.split("T")[0] : (dateString ?? "");
 
 const EmployeeForm = ({
   initialData: {
@@ -34,7 +40,7 @@ const EmployeeForm = ({
     email,
     title: jobTitle,
     department,
-    dateStarted: dateStarted.split("T")[0],
+    dateStarted: toInputDate(dateStarted),
     quote,
     status,
     avatarUrl,

@@ -1,19 +1,18 @@
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import { Link, useLoaderData } from "react-router-dom";
 import { Users, X, Building2 } from "lucide-react";
-import { useEmployeesQuery } from "@shared/lib/queries";
-import { useDeleteConfirmation } from "@shared/hooks/useDeleteConfirmation";
+import {
+  useEmployeesQuery,
+  useDeleteEmployeeMutation,
+} from "@shared/lib/queries";
 import { useUrlFilters } from "@shared/hooks/useUrlFilters";
-import { useDebounce } from "@shared/hooks/useDebounce";
-import { ReferenceData, Employee } from "../utils/__types__";
-import { ViewMode } from "./utils/__types__";
+import { ReferenceData, Employee, ViewMode } from "../__types__";
 import Pagination from "./Pagination";
 import FilterModal from "./FilterModal";
 import EmployeeCard from "./EmployeeCard";
 import EmployeeRow from "./EmployeeRow";
 import EmployeeSearchBar from "./EmployeeSearchBar";
 import EmployeeControls from "./EmployeeControls";
-import ActiveFilters from "./ActiveFilters";
 import DeleteConfirmationModal from "@shared/components/DeleteConfirmationModal";
 
 const ITEMS_PER_PAGE_OPTIONS = [6, 9, 12, 24];
@@ -21,12 +20,17 @@ const ITEMS_PER_PAGE_OPTIONS = [6, 9, 12, 24];
 const EmployeeListPage = () => {
   const { departments } = useLoaderData() as ReferenceData;
 
-  const { filters, setFilters, updateFilters, clearFilters } = useUrlFilters();
+  const { filters, setFilters, updateFilters, resetSearchCriteria } =
+    useUrlFilters();
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
   const [groupByDepartment, setGroupByDepartment] = useState(false);
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
+  const [debouncedSearch, setDebouncedSearch] = useState(filters.search);
 
-  const debouncedSearch = useDebounce(filters.search, 300);
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedSearch(filters.search), 300);
+    return () => clearTimeout(timer);
+  }, [filters.search]);
 
   const { data, isLoading, error } = useEmployeesQuery({
     search: debouncedSearch || undefined,
@@ -39,14 +43,13 @@ const EmployeeListPage = () => {
     limit: filters.limit,
   });
 
-  const {
-    deleteTarget,
-    isDeleting,
-    deleteError,
-    openDeleteConfirmation,
-    closeDeleteConfirmation,
-    confirmDelete,
-  } = useDeleteConfirmation();
+  const [deleteTarget, setDeleteTarget] = useState<{
+    id: number;
+    name: string;
+  } | null>(null);
+  const deleteMutation = useDeleteEmployeeMutation({
+    onSuccess: () => setDeleteTarget(null),
+  });
 
   const employees = data?.data ?? [];
   const totalCount = data?.total ?? 0;
@@ -94,12 +97,9 @@ const EmployeeListPage = () => {
   const activeFilterCount =
     filters.departments.length + (filters.status !== "all" ? 1 : 0);
 
-  const handleDelete = useCallback(
-    ({ id, firstName, lastName }: Employee) => {
-      openDeleteConfirmation(id, `${firstName} ${lastName}`);
-    },
-    [openDeleteConfirmation],
-  );
+  const handleDelete = useCallback(({ id, firstName, lastName }: Employee) => {
+    setDeleteTarget({ id, name: `${firstName} ${lastName}` });
+  }, []);
 
   const handlePageChange = useCallback(
     (page: number) => {
@@ -125,7 +125,7 @@ const EmployeeListPage = () => {
         <div className="animate-pulse">
           <div className="h-12 bg-elevated mb-4" />
           <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-            {[...Array(6)].map((_, i) => (
+            {[...Array(filters.limit)].map((_, i) => (
               <div key={i} className="h-48 bg-elevated" />
             ))}
           </div>
@@ -195,7 +195,30 @@ const EmployeeListPage = () => {
         />
       </div>
 
-      <ActiveFilters filters={activeFilterChips} onClearAll={clearFilters} />
+      {activeFilterChips.length > 0 && (
+        <div className="flex flex-wrap gap-2">
+          {activeFilterChips.map((filter, index) => (
+            <span
+              key={index}
+              className="inline-flex items-center gap-1.5 px-3 py-1 text-sm bg-sky-900/30 text-sky-300 border border-sky-500/30"
+            >
+              {filter.value}
+              <button
+                onClick={filter.onRemove}
+                className="p-0.5 hover:bg-sky-500/30 transition-colors"
+              >
+                <X className="w-3 h-3" />
+              </button>
+            </span>
+          ))}
+          <button
+            onClick={resetSearchCriteria}
+            className="text-sm text-muted hover:text-sky-400 underline"
+          >
+            Clear all
+          </button>
+        </div>
+      )}
 
       <div className="flex items-center justify-between text-xs text-muted px-1">
         <span>
@@ -227,7 +250,7 @@ const EmployeeListPage = () => {
             Try adjusting your search or filters
           </p>
           <button
-            onClick={clearFilters}
+            onClick={resetSearchCriteria}
             className="text-xs font-medium text-sky-400 hover:text-sky-300 underline"
           >
             Clear all filters
@@ -281,11 +304,11 @@ const EmployeeListPage = () => {
 
       <DeleteConfirmationModal
         isOpen={!!deleteTarget}
-        onClose={closeDeleteConfirmation}
-        onConfirm={confirmDelete}
-        isDeleting={isDeleting}
+        onClose={() => !deleteMutation.isPending && setDeleteTarget(null)}
+        onConfirm={() => deleteTarget && deleteMutation.mutate(deleteTarget.id)}
+        isDeleting={deleteMutation.isPending}
         itemName={deleteTarget?.name ?? ""}
-        error={deleteError}
+        error={deleteMutation.error?.message ?? null}
       />
     </div>
   );

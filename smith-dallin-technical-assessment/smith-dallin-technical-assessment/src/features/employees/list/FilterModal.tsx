@@ -7,7 +7,7 @@ import {
   SortField,
   SortOrder,
   StatusFilter,
-} from "./utils/__types__";
+} from "../__types__";
 
 const sortOptions: { value: SortField; label: string }[] = [
   { value: "firstName", label: "First Name" },
@@ -20,6 +20,22 @@ const statusOptions: { value: StatusFilter; label: string }[] = [
   { value: "inactive", label: "Inactive" },
 ];
 
+// Local state allows users to modify filters without immediately applying them.
+// State resets to current props when modal opens, preserving "cancel" behavior.
+type LocalFilters = {
+  departments: string[];
+  sortField: SortField;
+  sortOrder: SortOrder;
+  statusFilter: StatusFilter;
+};
+
+const DEFAULT_LOCAL: LocalFilters = {
+  departments: [],
+  sortField: "firstName",
+  sortOrder: "asc",
+  statusFilter: "all",
+};
+
 const FilterModal = ({
   isOpen,
   onClose,
@@ -30,54 +46,52 @@ const FilterModal = ({
   statusFilter,
   onApply,
 }: FilterModalProps) => {
-  const [localDepartments, setLocalDepartments] =
-    useState<string[]>(selectedDepartments);
-  const [localSortField, setLocalSortField] = useState<SortField>(sortField);
-  const [localSortOrder, setLocalSortOrder] = useState<SortOrder>(sortOrder);
-  const [localStatusFilter, setLocalStatusFilter] =
-    useState<StatusFilter>(statusFilter);
+  const [local, setLocal] = useState<LocalFilters>({
+    departments: selectedDepartments,
+    sortField,
+    sortOrder,
+    statusFilter,
+  });
 
   useEffect(() => {
     if (isOpen) {
-      setLocalDepartments(selectedDepartments);
-      setLocalSortField(sortField);
-      setLocalSortOrder(sortOrder);
-      setLocalStatusFilter(statusFilter);
+      setLocal({
+        departments: selectedDepartments,
+        sortField,
+        sortOrder,
+        statusFilter,
+      });
     }
   }, [isOpen, selectedDepartments, sortField, sortOrder, statusFilter]);
 
-  const toggleItem = (
-    item: string,
-    list: string[],
-    setList: (items: string[]) => void,
-  ) => {
-    setList(
-      list.includes(item) ? list.filter((i) => i !== item) : [...list, item],
-    );
+  const updateLocal = (updates: Partial<LocalFilters>) => {
+    setLocal((prev) => ({ ...prev, ...updates }));
+  };
+
+  const toggleDepartment = (dept: string) => {
+    const newDepts = local.departments.includes(dept)
+      ? local.departments.filter((d) => d !== dept)
+      : [...local.departments, dept];
+    updateLocal({ departments: newDepts });
   };
 
   const handleApply = () => {
     onApply(
-      localDepartments,
-      localSortField,
-      localSortOrder,
-      localStatusFilter,
+      local.departments,
+      local.sortField,
+      local.sortOrder,
+      local.statusFilter,
     );
     onClose();
   };
 
   const hasSelections =
-    localDepartments.length > 0 || localStatusFilter !== "all";
+    local.departments.length > 0 || local.statusFilter !== "all";
 
   const footer = (
     <>
       <button
-        onClick={() => {
-          setLocalDepartments([]);
-          setLocalSortField("firstName");
-          setLocalSortOrder("asc");
-          setLocalStatusFilter("all");
-        }}
+        onClick={() => setLocal(DEFAULT_LOCAL)}
         disabled={!hasSelections}
         className={cn(
           "flex-1 px-4 py-2 text-sm font-medium transition-colors",
@@ -112,10 +126,10 @@ const FilterModal = ({
             {statusOptions.map((opt) => (
               <button
                 key={opt.value}
-                onClick={() => setLocalStatusFilter(opt.value)}
+                onClick={() => updateLocal({ statusFilter: opt.value })}
                 className={cn(
                   "flex-1 px-3 py-2 text-sm border transition-colors",
-                  localStatusFilter === opt.value
+                  local.statusFilter === opt.value
                     ? "border-sky-500/50 bg-sky-900/30 text-sky-300"
                     : "border-border bg-elevated text-muted hover:border-sky-500/50",
                 )}
@@ -132,10 +146,10 @@ const FilterModal = ({
             {sortOptions.map((opt) => (
               <button
                 key={opt.value}
-                onClick={() => setLocalSortField(opt.value)}
+                onClick={() => updateLocal({ sortField: opt.value })}
                 className={cn(
                   "flex-1 px-3 py-2 text-sm border transition-colors",
-                  localSortField === opt.value
+                  local.sortField === opt.value
                     ? "border-sky-500/50 bg-sky-900/30 text-sky-300"
                     : "border-border bg-elevated text-muted hover:border-sky-500/50",
                 )}
@@ -146,10 +160,10 @@ const FilterModal = ({
           </div>
           <div className="flex gap-2 mt-2">
             <button
-              onClick={() => setLocalSortOrder("asc")}
+              onClick={() => updateLocal({ sortOrder: "asc" })}
               className={cn(
                 "flex-1 px-3 py-2 text-sm border transition-colors",
-                localSortOrder === "asc"
+                local.sortOrder === "asc"
                   ? "border-sky-500/50 bg-sky-900/30 text-sky-300"
                   : "border-border bg-elevated text-muted hover:border-sky-500/50",
               )}
@@ -157,10 +171,10 @@ const FilterModal = ({
               A → Z
             </button>
             <button
-              onClick={() => setLocalSortOrder("desc")}
+              onClick={() => updateLocal({ sortOrder: "desc" })}
               className={cn(
                 "flex-1 px-3 py-2 text-sm border transition-colors",
-                localSortOrder === "desc"
+                local.sortOrder === "desc"
                   ? "border-sky-500/50 bg-sky-900/30 text-sky-300"
                   : "border-border bg-elevated text-muted hover:border-sky-500/50",
               )}
@@ -180,10 +194,8 @@ const FilterModal = ({
               >
                 <input
                   type="checkbox"
-                  checked={localDepartments.includes(dept)}
-                  onChange={() =>
-                    toggleItem(dept, localDepartments, setLocalDepartments)
-                  }
+                  checked={local.departments.includes(dept)}
+                  onChange={() => toggleDepartment(dept)}
                   className="w-4 h-4 accent-sky-500"
                 />
                 <span className="text-sm text-primary">{dept}</span>

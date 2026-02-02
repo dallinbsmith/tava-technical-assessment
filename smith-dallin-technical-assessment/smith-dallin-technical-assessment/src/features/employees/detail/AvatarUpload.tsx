@@ -5,10 +5,56 @@ import { Camera, Upload, X, Loader2, Check } from "lucide-react";
 import { cn } from "@shared/lib/styles";
 import { uploadAvatar } from "@shared/lib/api";
 import Avatar from "../list/Avatar";
-import { AvatarUploadProps } from "./utils/__types__";
+import { AvatarUploadProps } from "../__types__";
 
-const MAX_FILE_SIZE = 5 * 1024 * 1024;
-const SUCCESS_TIMEOUT = 2000;
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+const SUCCESS_DISPLAY_MS = 2000;
+
+const HoverOverlay = () => (
+  <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+    <Camera className="w-8 h-8 text-white" />
+  </div>
+);
+
+const UploadingOverlay = () => (
+  <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+    <Loader2 className="w-8 h-8 text-white animate-spin" />
+  </div>
+);
+
+const SuccessOverlay = () => (
+  <div className="absolute inset-0 bg-green-500/50 flex items-center justify-center animate-pulse">
+    <Check className="w-8 h-8 text-white" />
+  </div>
+);
+
+const DragOverlay = () => (
+  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+    <div className="w-28 h-28 border-2 border-dashed border-sky-400 animate-pulse" />
+  </div>
+);
+
+const ErrorToast = ({
+  message,
+  onDismiss,
+}: {
+  message: string;
+  onDismiss: () => void;
+}) => (
+  <div className="absolute -bottom-12 left-1/2 -translate-x-1/2 z-50 px-3 py-1.5 bg-red-600 text-white text-xs whitespace-nowrap flex items-center gap-1 shadow-lg">
+    <span>{message}</span>
+    <button onClick={onDismiss} className="ml-1 hover:bg-red-700 p-0.5">
+      <X className="w-3 h-3" />
+    </button>
+  </div>
+);
+
+const getValidationError = (rejection: FileRejection): string => {
+  const error = rejection.errors[0];
+  if (error?.code === "file-too-large") return "Image must be less than 5MB";
+  if (error?.code === "file-invalid-type") return "Please select an image file";
+  return error?.message || "Invalid file";
+};
 
 const AvatarUpload = ({
   currentAvatarUrl,
@@ -18,7 +64,7 @@ const AvatarUpload = ({
   inactive = false,
 }: AvatarUploadProps) => {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const [success, setSuccess] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
   const [validationError, setValidationError] = useState<string | null>(null);
 
   const uploadMutation = useMutation({
@@ -28,22 +74,21 @@ const AvatarUpload = ({
       return url;
     },
     onSuccess: () => {
-      setSuccess(true);
-      setTimeout(() => setSuccess(false), SUCCESS_TIMEOUT);
+      setShowSuccess(true);
+      setTimeout(() => setShowSuccess(false), SUCCESS_DISPLAY_MS);
     },
     onError: () => {
       setPreviewUrl(null);
     },
   });
 
-  const handleFileDrop = (acceptedFiles: File[]) => {
+  const handleDrop = (acceptedFiles: File[]) => {
     const file = acceptedFiles[0];
     if (!file) return;
 
     setValidationError(null);
     uploadMutation.reset();
 
-    // Generate preview
     const reader = new FileReader();
     reader.onload = (e) => setPreviewUrl(e.target?.result as string);
     reader.readAsDataURL(file);
@@ -51,18 +96,15 @@ const AvatarUpload = ({
     uploadMutation.mutate(file);
   };
 
-  const handleFileRejection = (rejections: FileRejection[]) => {
-    const rejection = rejections[0];
-    if (!rejection) return;
-
-    const error = rejection.errors[0];
-    if (error?.code === "file-too-large") {
-      setValidationError("Image must be less than 5MB");
-    } else if (error?.code === "file-invalid-type") {
-      setValidationError("Please select an image file");
-    } else {
-      setValidationError(error?.message || "Invalid file");
+  const handleRejection = (rejections: FileRejection[]) => {
+    if (rejections[0]) {
+      setValidationError(getValidationError(rejections[0]));
     }
+  };
+
+  const dismissError = () => {
+    setValidationError(null);
+    uploadMutation.reset();
   };
 
   const { getRootProps, getInputProps, isDragActive, open } = useDropzone({
@@ -70,16 +112,9 @@ const AvatarUpload = ({
     maxSize: MAX_FILE_SIZE,
     multiple: false,
     disabled: uploadMutation.isPending,
-    onDrop: handleFileDrop,
-    onDropRejected: handleFileRejection,
-    noClick: false,
-    noKeyboard: false,
+    onDrop: handleDrop,
+    onDropRejected: handleRejection,
   });
-
-  const clearError = () => {
-    setValidationError(null);
-    uploadMutation.reset();
-  };
 
   const displayUrl = previewUrl || currentAvatarUrl;
   const error = validationError || uploadMutation.error?.message;
@@ -99,7 +134,6 @@ const AvatarUpload = ({
         })}
       >
         <input {...getInputProps()} />
-
         <Avatar
           src={displayUrl}
           firstName={firstName}
@@ -108,23 +142,10 @@ const AvatarUpload = ({
           inactive={inactive}
         />
 
-        {!isUploading && (
-          <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-            <Camera className="w-8 h-8 text-white" />
-          </div>
-        )}
-
-        {isUploading && (
-          <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-            <Loader2 className="w-8 h-8 text-white animate-spin" />
-          </div>
-        )}
-
-        {success && !isUploading && (
-          <div className="absolute inset-0 bg-green-500/50 flex items-center justify-center animate-pulse">
-            <Check className="w-8 h-8 text-white" />
-          </div>
-        )}
+        {!isUploading && !showSuccess && <HoverOverlay />}
+        {isUploading && <UploadingOverlay />}
+        {showSuccess && !isUploading && <SuccessOverlay />}
+        {isDragActive && <DragOverlay />}
       </div>
 
       {!isUploading && (
@@ -138,20 +159,7 @@ const AvatarUpload = ({
         </button>
       )}
 
-      {error && (
-        <div className="absolute -bottom-12 left-1/2 -translate-x-1/2 z-50 px-3 py-1.5 bg-red-600 text-white text-xs whitespace-nowrap flex items-center gap-1 shadow-lg">
-          <span>{error}</span>
-          <button onClick={clearError} className="ml-1 hover:bg-red-700 p-0.5">
-            <X className="w-3 h-3" />
-          </button>
-        </div>
-      )}
-
-      {isDragActive && (
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-          <div className="w-28 h-28 border-2 border-dashed border-sky-400 animate-pulse" />
-        </div>
-      )}
+      {error && <ErrorToast message={error} onDismiss={dismissError} />}
     </div>
   );
 };

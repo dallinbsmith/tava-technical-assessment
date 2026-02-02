@@ -1,12 +1,12 @@
 import { Filter, LayoutGrid, List, Building2 } from "lucide-react";
 import { cn } from "@shared/lib/styles";
-import { EmployeeControlsProps } from "./utils/__types__";
+import { EmployeeControlsProps, ViewMode } from "../__types__";
 
-const viewModes = [
-  { mode: "grid" as const, icon: LayoutGrid, label: "Grid" },
-  { mode: "list" as const, icon: List, label: "List" },
-  { mode: "group" as const, icon: Building2, label: "Group by department" },
-];
+const viewModes: { mode: ViewMode; icon: typeof LayoutGrid; label: string }[] =
+  [
+    { mode: "grid", icon: LayoutGrid, label: "Grid view" },
+    { mode: "list", icon: List, label: "List view" },
+  ];
 
 const EmployeeControls = ({
   viewMode,
@@ -36,33 +36,35 @@ const EmployeeControls = ({
     </button>
 
     <div className="flex border border-border overflow-hidden bg-elevated">
-      {viewModes.map(({ mode, icon: Icon, label }, index) => {
-        const isLast = index === viewModes.length - 1;
-        const isActive =
-          mode === "group" ? groupByDepartment : viewMode === mode;
-        const handleClick =
-          mode === "group"
-            ? () => onGroupByDepartmentChange(!groupByDepartment)
-            : () => onViewModeChange(mode as "grid" | "list");
-
-        return (
-          <button
-            key={mode}
-            onClick={handleClick}
-            className={cn(
-              "p-2 transition-colors",
-              !isLast && "border-r border-border",
-              isActive
-                ? "bg-sky-900/40 text-sky-300"
-                : "text-muted hover:bg-surface",
-            )}
-            title={label}
-          >
-            <Icon className="w-4 h-4" />
-          </button>
-        );
-      })}
+      {viewModes.map(({ mode, icon: Icon, label }) => (
+        <button
+          key={mode}
+          onClick={() => onViewModeChange(mode)}
+          className={cn(
+            "p-2 transition-colors border-r border-border last:border-r-0",
+            viewMode === mode
+              ? "bg-sky-900/40 text-sky-300"
+              : "text-muted hover:bg-surface",
+          )}
+          title={label}
+        >
+          <Icon className="w-4 h-4" />
+        </button>
+      ))}
     </div>
+
+    <button
+      onClick={() => onGroupByDepartmentChange(!groupByDepartment)}
+      className={cn(
+        "p-2 border transition-colors",
+        groupByDepartment
+          ? "border-sky-500/50 bg-sky-900/40 text-sky-300"
+          : "border-border bg-elevated text-muted hover:border-sky-500/50",
+      )}
+      title="Group by department"
+    >
+      <Building2 className="w-4 h-4" />
+    </button>
   </div>
 );
 

@@ -7,7 +7,7 @@ import {
   mockReferenceData,
 } from "@test/test-utils";
 import userEvent from "@testing-library/user-event";
-import EmployeeListPage from "../../EmployeeListPage";
+import EmployeeListPage from "../EmployeeListPage";
 import * as reactRouterDom from "react-router-dom";
 import * as queries from "@shared/lib/queries";
 

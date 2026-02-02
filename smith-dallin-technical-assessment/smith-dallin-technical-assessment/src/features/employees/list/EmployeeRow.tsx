@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { Building2, ChevronRight, Trash2 } from "lucide-react";
-import { EmployeeRowProps } from "./utils/__types__";
+import { EmployeeRowProps } from "../__types__";
 import Avatar from "./Avatar";
 
 const EmployeeRow = ({ employee, onDelete }: EmployeeRowProps) => {

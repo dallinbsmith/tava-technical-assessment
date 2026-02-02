@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, waitFor } from "@test/test-utils";
 import userEvent from "@testing-library/user-event";
-import EmployeeForm from "../../EmployeeForm";
+import EmployeeForm from "../EmployeeForm";
 
 describe("EmployeeForm", () => {
   const defaultProps = {
@@ -36,7 +36,6 @@ describe("EmployeeForm", () => {
     it("renders status toggle buttons", () => {
       render(<EmployeeForm {...defaultProps} />);
 
-      // Use getAllByRole since there may be multiple buttons with these names
       const activeButtons = screen.getAllByRole("button", {
         name: /^active$/i,
       });
@@ -113,7 +112,6 @@ describe("EmployeeForm", () => {
       const inactiveButton = screen.getByRole("button", { name: /inactive/i });
       await user.click(inactiveButton);
 
-      // Check that inactive button has the selected styling
       expect(inactiveButton).toHaveClass("bg-red-900/30");
     });
   });
@@ -123,7 +121,6 @@ describe("EmployeeForm", () => {
       const user = userEvent.setup();
       render(<EmployeeForm {...defaultProps} />);
 
-      // Fill other required fields but not first name
       await user.type(screen.getByLabelText(/last name/i), "Doe");
       await user.type(screen.getByLabelText(/start date/i), "2024-01-15");
 
@@ -149,8 +146,6 @@ describe("EmployeeForm", () => {
     });
 
     it("accepts empty email but validates email format when provided", async () => {
-      // This test verifies the email field behavior
-      // The schema allows empty email or valid email format
       const user = userEvent.setup();
       const initialData = {
         id: 1,
@@ -166,7 +161,6 @@ describe("EmployeeForm", () => {
       };
       render(<EmployeeForm {...defaultProps} initialData={initialData} />);
 
-      // Valid email should work
       const emailInput = screen.getByLabelText(/email/i);
       await user.type(emailInput, "valid@example.com");
 
@@ -177,14 +171,12 @@ describe("EmployeeForm", () => {
       const user = userEvent.setup();
       render(<EmployeeForm {...defaultProps} />);
 
-      // Trigger error
       await user.click(screen.getByText("Create Employee"));
 
       await waitFor(() => {
         expect(screen.getByText(/first name is required/i)).toBeInTheDocument();
       });
 
-      // Fix the error
       await user.type(screen.getByLabelText(/first name/i), "John");
 
       await waitFor(() => {
@@ -199,7 +191,6 @@ describe("EmployeeForm", () => {
     it("calls onSubmit with form data on valid submission", async () => {
       const onSubmit = vi.fn().mockResolvedValue(undefined);
       const user = userEvent.setup();
-      // Provide initialData with department to pass validation
       const initialData = {
         id: 1,
         firstName: "",

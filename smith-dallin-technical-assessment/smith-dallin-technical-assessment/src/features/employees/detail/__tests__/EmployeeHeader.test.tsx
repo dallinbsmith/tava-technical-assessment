@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { createQueryWrapper, mockEmployee } from "@test/test-utils";
-import EmployeeHeader from "../../EmployeeHeader";
+import EmployeeHeader from "../EmployeeHeader";
 
 describe("EmployeeHeader", () => {
   const defaultProps = {

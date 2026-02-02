@@ -47,3 +47,8 @@ export type ReferenceData = {
 export type EditLoaderData = ReferenceData & {
   employee: Employee;
 };
+
+// Re-export component types
+export * from "./detail.types";
+export * from "./form.types";
+export * from "./list.types";

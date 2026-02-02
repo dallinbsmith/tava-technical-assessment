@@ -1,7 +1,16 @@
 import { Link } from "react-router-dom";
 import { Building2, Calendar } from "lucide-react";
-import { EmployeeCardProps } from "./utils/__types__";
+import { EmployeeCardProps } from "../__types__";
 import Avatar from "./Avatar";
+
+const formatDateShort = (dateString?: string) =>
+  dateString
+    ? new Date(dateString).toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      })
+    : "Not specified";
 
 const EmployeeCard = ({ employee }: EmployeeCardProps) => {
   const {
@@ -53,14 +62,7 @@ const EmployeeCard = ({ employee }: EmployeeCardProps) => {
           </div>
           <div className="flex items-center gap-3 text-xs text-muted">
             <Calendar className="w-4 h-4" />
-            <span>
-              Started{" "}
-              {new Date(dateStarted).toLocaleDateString("en-US", {
-                month: "short",
-                day: "numeric",
-                year: "numeric",
-              })}
-            </span>
+            <span>Started {formatDateShort(dateStarted)}</span>
           </div>
         </div>
       </div>

@@ -44,7 +44,6 @@ const parseFilters = (searchParams: URLSearchParams): UrlFilters => {
 export const useUrlFilters = () => {
   const [searchParams, setSearchParams] = useSearchParams();
 
-  // Memoize to maintain stable reference for React Query cache keys
   const filters = useMemo(() => parseFilters(searchParams), [searchParams]);
 
   const setFilters = (
@@ -56,7 +55,6 @@ export const useUrlFilters = () => {
         typeof updater === "function" ? updater(prevFilters) : updater;
       const params = new URLSearchParams();
 
-      // Only set non-default values
       if (newFilters.search) params.set("search", newFilters.search);
       if (newFilters.departments.length > 0)
         params.set("departments", newFilters.departments.join(","));
@@ -74,7 +72,7 @@ export const useUrlFilters = () => {
     setFilters((prev) => ({ ...prev, ...updates, page: 1 }));
   };
 
-  const clearFilters = () => {
+  const resetSearchCriteria = () => {
     setFilters((prev) => ({
       ...DEFAULT_FILTERS,
       sort: prev.sort,
@@ -87,7 +85,7 @@ export const useUrlFilters = () => {
     filters,
     setFilters,
     updateFilters,
-    clearFilters,
+    resetSearchCriteria,
     DEFAULT_FILTERS,
   };
 };

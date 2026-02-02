@@ -1,5 +1,5 @@
 import { Search, X } from "lucide-react";
-import { EmployeeSearchBarProps } from "./utils/__types__";
+import { EmployeeSearchBarProps } from "../__types__";
 
 const EmployeeSearchBar = ({ value, onChange }: EmployeeSearchBarProps) => (
   <div className="relative flex-1 min-w-0">

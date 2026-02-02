@@ -4,12 +4,13 @@ import {
   RouterProvider,
   Link,
   Outlet,
+  useRouteError,
 } from "react-router-dom";
+import { AlertTriangle, RefreshCw, Home } from "lucide-react";
 import tavaLogo from "@/assets/tava-logo.svg";
 import EmployeeListPage from "@features/employees/list/EmployeeListPage";
 import EmployeeDetailPage from "@features/employees/detail/EmployeeDetailPage";
 import EmployeeFormPage from "@features/employees/form/EmployeeFormPage";
-import ErrorBoundary from "@shared/components/ErrorBoundary";
 import { getDepartments, getEmployee } from "@shared/lib/api";
 
 const queryClient = new QueryClient({
@@ -32,6 +33,42 @@ const editLoader = async ({ params }: { params: { id?: string } }) => {
     getEmployee(parseInt(params.id!)),
   ]);
   return { departments, employee };
+};
+
+const ErrorPage = () => {
+  const error = useRouteError() as Error;
+
+  return (
+    <div className="min-h-[400px] flex items-center justify-center p-8">
+      <div className="card p-8 text-center max-w-md">
+        <div className="w-16 h-16 bg-red-900/50 flex items-center justify-center mx-auto mb-4 rounded-full">
+          <AlertTriangle className="w-8 h-8 text-red-400" />
+        </div>
+        <h2 className="text-xl font-semibold text-primary mb-2">
+          Something went wrong
+        </h2>
+        <p className="text-muted mb-4">
+          {error?.message || "An unexpected error occurred"}
+        </p>
+        <div className="flex gap-3 justify-center">
+          <button
+            onClick={() => window.location.reload()}
+            className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium bg-sky-900/40 text-sky-300 border border-sky-700/50 hover:bg-sky-800/50 transition-colors"
+          >
+            <RefreshCw className="w-4 h-4" />
+            Try again
+          </button>
+          <Link
+            to="/"
+            className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-muted hover:text-primary transition-colors"
+          >
+            <Home className="w-4 h-4" />
+            Go home
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
 };
 
 const Layout = () => (
@@ -58,9 +95,7 @@ const Layout = () => (
       </div>
     </header>
     <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <ErrorBoundary>
-        <Outlet />
-      </ErrorBoundary>
+      <Outlet />
     </main>
   </div>
 );
@@ -68,6 +103,7 @@ const Layout = () => (
 const router = createBrowserRouter([
   {
     element: <Layout />,
+    errorElement: <ErrorPage />,
     children: [
       {
         path: "/",

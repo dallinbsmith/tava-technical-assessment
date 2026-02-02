@@ -10,26 +10,17 @@ import {
 import {
   EmployeeFormData,
   EmployeeFilters,
-} from "../../features/employees/utils/__types__";
-
-export const employeeKeys = {
-  all: ["employees"] as const,
-  lists: () => [...employeeKeys.all, "list"] as const,
-  list: (filters: EmployeeFilters) =>
-    [...employeeKeys.lists(), filters] as const,
-  details: () => [...employeeKeys.all, "detail"] as const,
-  detail: (id: number) => [...employeeKeys.details(), id] as const,
-};
+} from "../../features/employees/__types__";
 
 export const useEmployeesQuery = (filters: EmployeeFilters) =>
   useQuery({
-    queryKey: employeeKeys.list(filters),
+    queryKey: ["employees", "list", filters],
     queryFn: () => getEmployees(filters),
   });
 
 export const useEmployeeQuery = (id: number) =>
   useQuery({
-    queryKey: employeeKeys.detail(id),
+    queryKey: ["employees", "detail", id],
     queryFn: () => getEmployee(id),
     enabled: !!id,
   });
@@ -41,8 +32,7 @@ export const useCreateEmployeeMutation = () => {
   return useMutation({
     mutationFn: createEmployee,
     onSuccess: () => {
-      // Only invalidate lists, not individual details
-      queryClient.invalidateQueries({ queryKey: employeeKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: ["employees", "list"] });
       navigate("/");
     },
   });
@@ -55,10 +45,8 @@ export const useUpdateEmployeeMutation = (id: number) => {
   return useMutation({
     mutationFn: (data: EmployeeFormData) => updateEmployee(id, data),
     onSuccess: (updatedEmployee) => {
-      // Update the specific employee in cache
-      queryClient.setQueryData(employeeKeys.detail(id), updatedEmployee);
-      // Invalidate lists since employee data changed
-      queryClient.invalidateQueries({ queryKey: employeeKeys.lists() });
+      queryClient.setQueryData(["employees", "detail", id], updatedEmployee);
+      queryClient.invalidateQueries({ queryKey: ["employees", "list"] });
       navigate("/");
     },
   });
@@ -72,10 +60,10 @@ export const useDeleteEmployeeMutation = (options?: {
   return useMutation({
     mutationFn: deleteEmployee,
     onSuccess: (_, deletedId) => {
-      // Remove from cache
-      queryClient.removeQueries({ queryKey: employeeKeys.detail(deletedId) });
-      // Invalidate lists
-      queryClient.invalidateQueries({ queryKey: employeeKeys.lists() });
+      queryClient.removeQueries({
+        queryKey: ["employees", "detail", deletedId],
+      });
+      queryClient.invalidateQueries({ queryKey: ["employees", "list"] });
       options?.onSuccess?.();
     },
   });
@@ -88,13 +76,11 @@ export const useAvatarMutation = (employeeId: number) => {
     mutationFn: (avatarUrl: string) =>
       updateEmployee(employeeId, { avatarUrl }),
     onSuccess: (updatedEmployee) => {
-      // Update specific employee
       queryClient.setQueryData(
-        employeeKeys.detail(employeeId),
+        ["employees", "detail", employeeId],
         updatedEmployee,
       );
-      // Invalidate lists to update avatars there too
-      queryClient.invalidateQueries({ queryKey: employeeKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: ["employees", "list"] });
     },
   });
 };

@@ -1,13 +1,12 @@
-import { ReactNode, InputHTMLAttributes, TextareaHTMLAttributes } from "react";
 import { cn } from "@shared/lib/styles";
+import {
+  FormRowProps,
+  FormFieldProps,
+  FormInputProps,
+  FormTextAreaProps,
+} from "../__types__";
 
-export const FormRow = ({
-  children,
-  className,
-}: {
-  children: ReactNode;
-  className?: string;
-}) => (
+export const FormRow = ({ children, className }: FormRowProps) => (
   <div className={cn("grid grid-cols-1 sm:grid-cols-2 gap-4", className)}>
     {children}
   </div>
@@ -19,13 +18,7 @@ export const FormField = ({
   error,
   children,
   htmlFor,
-}: {
-  label: string;
-  required?: boolean;
-  error?: string;
-  children: ReactNode;
-  htmlFor?: string;
-}) => (
+}: FormFieldProps) => (
   <div>
     <label
       htmlFor={htmlFor}
@@ -38,11 +31,7 @@ export const FormField = ({
   </div>
 );
 
-export const FormInput = ({
-  error,
-  className,
-  ...props
-}: InputHTMLAttributes<HTMLInputElement> & { error?: boolean }) => (
+export const FormInput = ({ error, className, ...props }: FormInputProps) => (
   <input
     className={cn("input-field", error && "error", className)}
     {...props}
@@ -53,7 +42,7 @@ export const FormTextArea = ({
   error,
   className,
   ...props
-}: TextareaHTMLAttributes<HTMLTextAreaElement> & { error?: boolean }) => (
+}: FormTextAreaProps) => (
   <textarea
     className={cn("input-field resize-none", error && "error", className)}
     {...props}

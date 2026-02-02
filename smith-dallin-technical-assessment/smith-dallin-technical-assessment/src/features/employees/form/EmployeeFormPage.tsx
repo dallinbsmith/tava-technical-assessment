@@ -3,11 +3,7 @@ import {
   useCreateEmployeeMutation,
   useUpdateEmployeeMutation,
 } from "@shared/lib/queries";
-import {
-  EmployeeFormData,
-  EditLoaderData,
-  ReferenceData,
-} from "../utils/__types__";
+import { EmployeeFormData, EditLoaderData, ReferenceData } from "../__types__";
 import EmployeeForm from "./EmployeeForm";
 
 const EmployeeFormPage = () => {

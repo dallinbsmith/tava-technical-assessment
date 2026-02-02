@@ -1,4 +1,4 @@
-import { Employee, EmployeeFormData } from "../../../utils/__types__";
+import { Employee, EmployeeFormData } from "./index";
 
 export type EmployeeFormProps = {
   initialData?: Partial<Employee>;

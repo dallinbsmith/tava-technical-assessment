@@ -1,7 +1,11 @@
+import { useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { ArrowLeft, Pencil, Trash2, Loader2 } from "lucide-react";
-import { useEmployeeQuery, useAvatarMutation } from "@shared/lib/queries";
-import { useDeleteConfirmation } from "@shared/hooks/useDeleteConfirmation";
+import {
+  useEmployeeQuery,
+  useAvatarMutation,
+  useDeleteEmployeeMutation,
+} from "@shared/lib/queries";
 import EmployeeHeader from "./EmployeeHeader";
 import EmployeeInfo from "./EmployeeInfo";
 import DeleteConfirmationModal from "@shared/components/DeleteConfirmationModal";
@@ -14,14 +18,11 @@ const EmployeeDetailPage = () => {
   const { data: employee, isLoading, error } = useEmployeeQuery(employeeId);
   const avatarMutation = useAvatarMutation(employeeId);
 
-  const {
-    deleteTarget,
-    isDeleting,
-    deleteError,
-    openDeleteConfirmation,
-    closeDeleteConfirmation,
-    confirmDelete,
-  } = useDeleteConfirmation({
+  const [deleteTarget, setDeleteTarget] = useState<{
+    id: number;
+    name: string;
+  } | null>(null);
+  const deleteMutation = useDeleteEmployeeMutation({
     onSuccess: () => navigate("/"),
   });
 
@@ -70,10 +71,10 @@ const EmployeeDetailPage = () => {
           </Link>
           <button
             onClick={() =>
-              openDeleteConfirmation(
-                employee.id,
-                `${employee.firstName} ${employee.lastName}`,
-              )
+              setDeleteTarget({
+                id: employee.id,
+                name: `${employee.firstName} ${employee.lastName}`,
+              })
             }
             className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium bg-red-900/30 text-red-300 border border-red-700/40 hover:bg-red-800/40 transition-colors"
           >
@@ -93,11 +94,11 @@ const EmployeeDetailPage = () => {
 
       <DeleteConfirmationModal
         isOpen={!!deleteTarget}
-        onClose={closeDeleteConfirmation}
-        onConfirm={confirmDelete}
-        isDeleting={isDeleting}
+        onClose={() => !deleteMutation.isPending && setDeleteTarget(null)}
+        onConfirm={() => deleteTarget && deleteMutation.mutate(deleteTarget.id)}
+        isDeleting={deleteMutation.isPending}
         itemName={deleteTarget?.name ?? ""}
-        error={deleteError}
+        error={deleteMutation.error?.message ?? null}
       />
     </div>
   );

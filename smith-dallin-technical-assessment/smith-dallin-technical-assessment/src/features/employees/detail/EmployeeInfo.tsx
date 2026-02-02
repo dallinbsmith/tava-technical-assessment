@@ -1,7 +1,7 @@
 import { Mail, Building2, Calendar } from "lucide-react";
-import { EmployeeInfoProps } from "./utils/__types__";
+import { EmployeeInfoProps } from "../__types__";
 
-const formatDate = (dateString?: string) =>
+const formatDateLong = (dateString?: string) =>
   dateString
     ? new Date(dateString).toLocaleDateString("en-US", {
         weekday: "long",
@@ -66,7 +66,7 @@ const EmployeeInfo = ({ employee }: EmployeeInfoProps) => {
             <InfoItem
               icon={Calendar}
               label="Start Date"
-              value={formatDate(dateStarted)}
+              value={formatDateLong(dateStarted)}
             />
           </div>
 

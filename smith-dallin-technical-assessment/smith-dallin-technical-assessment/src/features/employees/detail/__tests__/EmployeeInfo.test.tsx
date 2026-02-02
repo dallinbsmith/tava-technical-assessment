@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { mockEmployee as baseMockEmployee } from "@test/test-utils";
-import EmployeeInfo from "../../EmployeeInfo";
+import EmployeeInfo from "../EmployeeInfo";
 
 const mockEmployee = { ...baseMockEmployee, avatarUrl: "" };
 

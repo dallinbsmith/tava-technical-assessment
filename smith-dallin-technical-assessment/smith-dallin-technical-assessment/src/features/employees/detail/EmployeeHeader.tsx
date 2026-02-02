@@ -1,4 +1,4 @@
-import { EmployeeHeaderProps } from "./utils/__types__";
+import { EmployeeHeaderProps } from "../__types__";
 import AvatarUpload from "./AvatarUpload";
 
 const EmployeeHeader = ({ employee, onAvatarUpload }: EmployeeHeaderProps) => {

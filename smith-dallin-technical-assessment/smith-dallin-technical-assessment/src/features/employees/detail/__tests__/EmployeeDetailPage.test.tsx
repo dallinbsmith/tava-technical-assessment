@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, waitFor, mockEmployee } from "@test/test-utils";
 import userEvent from "@testing-library/user-event";
-import EmployeeDetailPage from "../../EmployeeDetailPage";
+import EmployeeDetailPage from "../EmployeeDetailPage";
 import * as reactRouterDom from "react-router-dom";
 import * as queries from "@shared/lib/queries";
 
@@ -172,7 +172,6 @@ describe("EmployeeDetailPage", () => {
         expect(
           screen.getByText(/Are you sure you want to remove/),
         ).toBeInTheDocument();
-        // The name appears in the confirmation dialog with <strong> tag
         const confirmText = screen.getByText(/Are you sure you want to remove/);
         expect(confirmText.closest("p")?.textContent).toContain("John Doe");
       });

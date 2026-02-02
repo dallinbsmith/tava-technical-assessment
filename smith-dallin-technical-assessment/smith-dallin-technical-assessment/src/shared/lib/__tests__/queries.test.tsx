@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderHook, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { MemoryRouter } from "react-router-dom";
-import { employeeKeys, useEmployeesQuery, useEmployeeQuery } from "../queries";
+import { useEmployeesQuery, useEmployeeQuery } from "../queries";
 import * as api from "../api";
 
 vi.mock("../api");
@@ -34,21 +34,6 @@ const createWrapper = () => {
     </QueryClientProvider>
   );
 };
-
-describe("employeeKeys", () => {
-  it("generates correct key for all employees", () => {
-    expect(employeeKeys.all).toEqual(["employees"]);
-  });
-
-  it("generates correct key for employee list with filters", () => {
-    const filters = { search: "john", page: 1 };
-    expect(employeeKeys.list(filters)).toEqual(["employees", "list", filters]);
-  });
-
-  it("generates correct key for employee detail", () => {
-    expect(employeeKeys.detail(1)).toEqual(["employees", "detail", 1]);
-  });
-});
 
 describe("useEmployeesQuery", () => {
   beforeEach(() => {

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { cn } from "@shared/lib/styles";
-import { AvatarProps, AvatarSize } from "./utils/__types__";
+import { AvatarProps, AvatarSize } from "../__types__";
 
 const sizeClasses: Record<AvatarSize, { container: string; text: string }> = {
   sm: { container: "w-8 h-8", text: "text-xs" },

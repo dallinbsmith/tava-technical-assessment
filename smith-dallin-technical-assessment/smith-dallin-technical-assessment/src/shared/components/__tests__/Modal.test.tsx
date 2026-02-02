@@ -46,7 +46,6 @@ describe("Modal", () => {
 
       render(<Modal {...defaultProps} onClose={onClose} />);
 
-      // The backdrop is the div with bg-black/60
       const backdrop = document.querySelector(".bg-black\\/60");
       await user.click(backdrop!);
 
@@ -64,7 +63,6 @@ describe("Modal", () => {
     it("renders icon when provided", () => {
       render(<Modal {...defaultProps} icon={Settings} />);
 
-      // Icon should be in the document (SVG element)
       const header = screen.getByText("Test Modal").parentElement;
       expect(header?.querySelector("svg")).toBeInTheDocument();
     });
@@ -73,7 +71,6 @@ describe("Modal", () => {
       render(<Modal {...defaultProps} />);
 
       const header = screen.getByText("Test Modal").parentElement;
-      // Only the X close button icon should be present, not in the title area
       const titleArea = header?.querySelector("svg");
       expect(titleArea).not.toBeInTheDocument();
     });
@@ -91,7 +88,6 @@ describe("Modal", () => {
     it("does not render footer section when not provided", () => {
       render(<Modal {...defaultProps} />);
 
-      // The only border-t should be on the header, not a footer
       expect(screen.queryByText("Submit")).not.toBeInTheDocument();
     });
   });
