@@ -6,16 +6,6 @@ export type StatusFilter = "all" | "active" | "inactive";
 export type SortOrder = "asc" | "desc";
 export type AvatarSize = "sm" | "md" | "lg" | "xl";
 
-export type ListFilters = {
-  search: string;
-  departments: string[];
-  status: StatusFilter;
-  sort: SortField;
-  order: SortOrder;
-  page: number;
-  limit: number;
-};
-
 export type FilterModalProps = {
   isOpen: boolean;
   onClose: () => void;

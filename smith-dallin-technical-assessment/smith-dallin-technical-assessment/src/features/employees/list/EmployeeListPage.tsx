@@ -56,8 +56,8 @@ const EmployeeListPage = () => {
   const totalPages = Math.ceil(totalCount / filters.limit);
 
   const groupedEmployees = useMemo(() => {
-    if (!groupByDepartment) return null;
-    return employees.reduce(
+    if (!groupByDepartment || !data?.data) return null;
+    return data.data.reduce(
       (groups, emp) => {
         const dept = emp.department || "No Department";
         (groups[dept] ??= []).push(emp);
@@ -65,7 +65,7 @@ const EmployeeListPage = () => {
       },
       {} as Record<string, Employee[]>,
     );
-  }, [employees, groupByDepartment]);
+  }, [data?.data, groupByDepartment]);
 
   const activeFilterChips = useMemo(
     () => [

@@ -1,11 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import {
-  render,
-  screen,
-  waitFor,
-  mockEmployees,
-  mockReferenceData,
-} from "@test/test-utils";
+import { render, screen, waitFor } from "@test/test-utils";
+import { mockEmployees, mockReferenceData } from "@test/mocks";
 import userEvent from "@testing-library/user-event";
 import EmployeeListPage from "../EmployeeListPage";
 import * as reactRouterDom from "react-router-dom";

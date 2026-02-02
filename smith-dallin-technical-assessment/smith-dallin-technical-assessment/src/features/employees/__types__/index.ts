@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const employeeStatusSchema = z.enum(["active", "inactive"]);
+const employeeStatusSchema = z.enum(["active", "inactive"]);
 
 export const employeeSchema = z.object({
   id: z.number(),
@@ -27,18 +27,15 @@ export const employeeFiltersSchema = z.object({
   limit: z.number().optional(),
 });
 
-export const employeesResponseSchema = z.object({
-  data: z.array(employeeSchema),
-  total: z.number(),
-  page: z.number(),
-  limit: z.number(),
-});
-
-export type EmployeeStatus = z.infer<typeof employeeStatusSchema>;
 export type Employee = z.infer<typeof employeeSchema>;
 export type EmployeeFormData = z.infer<typeof employeeFormSchema>;
 export type EmployeeFilters = z.infer<typeof employeeFiltersSchema>;
-export type EmployeesResponse = z.infer<typeof employeesResponseSchema>;
+export type EmployeesResponse = {
+  data: Employee[];
+  total: number;
+  page: number;
+  limit: number;
+};
 
 export type ReferenceData = {
   departments: string[];

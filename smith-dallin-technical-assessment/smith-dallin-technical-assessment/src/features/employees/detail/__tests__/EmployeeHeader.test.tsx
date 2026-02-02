@@ -1,6 +1,7 @@
 import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
-import { createQueryWrapper, mockEmployee } from "@test/test-utils";
+import { createQueryWrapper } from "@test/test-utils";
+import { mockEmployee } from "@test/mocks";
 import EmployeeHeader from "../EmployeeHeader";
 
 describe("EmployeeHeader", () => {

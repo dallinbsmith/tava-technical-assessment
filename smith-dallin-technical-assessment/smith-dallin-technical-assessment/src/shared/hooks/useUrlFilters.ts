@@ -5,7 +5,7 @@ type SortField = "firstName" | "lastName";
 type SortOrder = "asc" | "desc";
 type StatusFilter = "all" | "active" | "inactive";
 
-export type UrlFilters = {
+type UrlFilters = {
   search: string;
   departments: string[];
   status: StatusFilter;
